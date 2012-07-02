@@ -1,0 +1,42 @@
+package main
+
+import (
+    "fmt"
+
+    "bitbucket.org/juztin/dingo"
+    "bitbucket.org/juztin/dingo/views"
+)
+
+func index(ctx dingo.Context) {
+    views.Execute(ctx, "index.html", nil)
+}
+
+func test(ctx dingo.Context) {
+    views.Get("base.html").Reload(ctx)
+    views.Execute(ctx, "index.html", nil)
+}
+
+func testRouteData(ctx dingo.Context) {
+    fmt.Println(ctx.RouteData)
+    views.Execute(ctx, "index.html", nil)
+}
+
+func main() {
+    s := dingo.New("0.0.0.0", 8000)
+
+    // --- Routes ---
+    views.New("base.html")
+    views.Editable(views.New("index.html")).Extends("base.html")
+
+    s.AddRoute("^/$", index, "GET", "POST")
+    s.Get("^/test/$", test)
+
+    s.AddRoute("^/blog/(?P<year>\\d{4})/(?P<month>\\d{2})/(?P<day>\\d{2})/(?P<title>\\w+)/$", testRouteData, "GET")
+
+    // ---- Editable ----
+    s.AddRoute("^/_dt/$", views.EditHandler, "GET", "POST")
+    views.AddEditableView("base.html")
+
+    s.Serve()
+}
+

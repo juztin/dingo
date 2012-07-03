@@ -11,7 +11,7 @@ import (
 
 var (
     editTempl, _  = template.New("_dingoedit_").Parse(editTemplate)
-    editableViews = make(map[string]dingo.View)
+    editableViews = make(map[string]View)
     CanEdit       = func(ctx dingo.Context) bool { return true }
     EmptyTmpl     = "<!doctype html><head><title>Template Doesn't Exist</title></head>"+
                     "<body>This template doesn't exist, or hasn't been created yet.</body></html>"
@@ -23,10 +23,10 @@ type EditTemplateData struct {
     URL, DoneURL, DingoVer string
     HasViews, IsAction, WasSaved bool
     Error error
-    Views map[string]dingo.View
+    Views map[string]View
     Content []byte
 }
-func editViewData(ctx dingo.Context, v dingo.View) EditTemplateData {
+func editViewData(ctx dingo.Context, v View) EditTemplateData {
     d := new(EditTemplateData)
     d.DingoVer = dingo.VERSION
     d.DoneURL = ctx.URL.Path
@@ -46,11 +46,11 @@ func editCtxData(ctx dingo.Context) EditTemplateData {
 }
 
 type editable struct {
-    dingo.View
+    View
     tmpl *template.Template
 }
 
-func Editable(view dingo.View) dingo.View {
+func Editable(view View) View {
     e := new(editable)
     e.View = view
     e.tmpl = editTempl
@@ -97,7 +97,7 @@ func EditHandler(ctx dingo.Context) {
     ctx.ParseForm()
     d := editCtxData(ctx)
 
-    var v dingo.View
+    var v View
     if n, ok := ctx.Form["name"]; !ok {
         editTempl.Execute(ctx.Writer, d)
         return

@@ -46,11 +46,10 @@ type gae struct {
     tmpl *template.Template
     bytes []byte
     key string
-    associated []dingo.View
-    extensions []dingo.View
+    associated, extensions []string
 }
 
-func New(key string) dingo.View {
+func New(key string) views.View {
     g := new(gae)
     g.key = key
     g.tmpl, _ = template.New(key).Parse(views.EmptyTmpl)
@@ -66,7 +65,7 @@ func (g *gae) Name() string {
 func (g *gae) Associate(names ...string) error {
     for _, n := range names {
         if view := views.Get(n); view != nil {
-            g.associated = append(g.associated, view)
+            g.associated = append(g.associated, view.Name())
         }
     }
 
@@ -76,7 +75,7 @@ func (g *gae) Associate(names ...string) error {
 func (g *gae) Extends(name string) error {
     if view := views.Get(name); view != nil {
         g.isStale = true
-        g.extensions = append(g.extensions, view)
+        g.extensions = append(g.extensions, view.Name())
         view.Associate(g.Name())
     }
 
@@ -102,8 +101,12 @@ func (g *gae) Reload(ctx dingo.Context) error {
         return e
     }
 
+    var v views.View
     // reload/re-parse all extensions
-    for _, v := range g.extensions {
+    for _, n := range g.extensions {
+        if v = views.Get(n); v == nil {
+            return errors.New(fmt.Sprintf("View doesn't exist: %s\n", n))
+        }
         if t, e = t.Parse(v.Data(ctx)); e != nil {
             fmt.Println(e.Error())
             return e
@@ -112,7 +115,10 @@ func (g *gae) Reload(ctx dingo.Context) error {
     g.tmpl, g.bytes = t, b
 
     // notify all associated templates
-    for _, v := range g.associated {
+    for _, n := range g.associated {
+        if v := views.Get(n); v == nil {
+            return errors.New(fmt.Sprintf("View doesn't exist: %s\n", n))
+        }
         v.Reload(ctx)
     }
     g.isStale = false

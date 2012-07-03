@@ -24,6 +24,8 @@ func testRouteData(ctx dingo.Context) {
 func main() {
     s := dingo.New("0.0.0.0", 8000)
 
+    views.Path = "../templates"
+
     // --- Routes ---
     views.New("base.html")
     views.Editable(views.New("index.html")).Extends("base.html")

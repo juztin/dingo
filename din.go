@@ -22,17 +22,6 @@ var (
 /*----------------------------------Handler-----------------------------------*/
 type Handler func(ctx Context)
 
-/*-----------------------------------View-------------------------------------*/
-type View interface {
-    Name() string
-    Associate(names ...string) error
-    Extends(name string) error
-    Data(ctx Context) string
-    Reload(ctx Context) error
-    Save(ctx Context, data []byte) error
-    Execute(ctx Context, data interface{}) error
-}
-
 /*----------------------------------Context-----------------------------------*/
 type Context struct {
     *http.Request
@@ -51,14 +40,10 @@ func (c *Context) write(content string) {
     c.Writer.Write(b)
 }
 
-func (c *Context) Render(view View, data interface{}) {
-    // find the view and render it
-    view.Execute(*c, data)
-}
-
 func (c *Context) Redirect(path string) {
     http.Redirect(c.Writer, c.Request, path, http.StatusTemporaryRedirect)
 }
+
 func (c *Context) RedirectPerm(path string) {
     w := c.Writer
     w.Header().Set("Location", path)

@@ -3,12 +3,16 @@ package views
 import (
     "fmt"
     "io/ioutil"
+    "path/filepath"
     "text/template"
 
     "bitbucket.org/juztin/dingo"
 )
 
-var viewCol = make(map[string]dingo.View)
+var (
+    TmplPath = "./templates"
+    viewCol = make(map[string]dingo.View)
+)
 
 func Add(key string, v dingo.View) {
     viewCol[key] = v
@@ -42,7 +46,8 @@ func parseFile(viewLoc string) (*template.Template, []byte, error) {
 		return nil, nil, err
 	}
 
-    t := template.New(viewLoc)
+    p := filepath.Join(TmplPath, viewLoc)
+    t := template.New(p)
 	if _, err = t.Parse(string(b)); err != nil {
 		return nil, nil, err
 	}
@@ -51,9 +56,10 @@ func parseFile(viewLoc string) (*template.Template, []byte, error) {
 }
 
 func New(location string) dingo.View {
+    p := filepath.Join(TmplPath, location)
     v := new(view)
     v.loc = location
-    v.tmpl, _ = template.New(location).Parse(EmptyTmpl)
+    v.tmpl, _ = template.New(p).Parse(EmptyTmpl)
     Add(location, v)
 
     return v
@@ -92,7 +98,8 @@ func (v *view) Extends(name string) error {
 }
 func (v *view) Data(ctx dingo.Context) string {
     if !v.isLoaded {
-        t, b, e := parseFile(v.loc)
+        p := filepath.Join(TmplPath, v.loc)
+        t, b, e := parseFile(p)
         if e != nil {
             fmt.Println(e.Error())
             return e.Error()
@@ -102,7 +109,8 @@ func (v *view) Data(ctx dingo.Context) string {
     return string(v.bytes)
 }
 func (v *view) Reload(ctx dingo.Context) error {
-    t, b, e := parseFile(v.loc)
+    p := filepath.Join(TmplPath, v.loc)
+    t, b, e := parseFile(p)
     if e != nil {
         fmt.Println(e.Error())
         return e
@@ -132,7 +140,8 @@ func (v *view) Save(ctx dingo.Context, data []byte) error {
         return err
     }
 
-    if err := ioutil.WriteFile(v.loc, data, 0600); err != nil {
+    p := filepath.Join(TmplPath, v.loc)
+    if err := ioutil.WriteFile(p, data, 0600); err != nil {
         return err
     }
 

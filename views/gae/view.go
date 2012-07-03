@@ -115,6 +115,7 @@ func (g *gae) Reload(ctx dingo.Context) error {
     for _, v := range g.associated {
         v.Reload(ctx)
     }
+    g.isStale = false
 
     return nil
 }

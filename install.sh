@@ -1,4 +1,4 @@
 #!/bin/sh -
 
-go install ../dingo
-go install ../dingo/views
+go install bitbucket.org/juztin/dingo
+go install bitbucket.org/juztin/dingo/views

@@ -25,8 +25,6 @@ type Handler func(ctx Context)
 /*-----------------------------------View-------------------------------------*/
 type View interface {
     Name() string
-    //Associate(views ...View) error
-    //Extends(view View) error
     Associate(names ...string) error
     Extends(name string) error
     Data(ctx Context) string

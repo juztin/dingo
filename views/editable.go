@@ -20,7 +20,7 @@ var (
 type EditCheck func(ctx dingo.Context) bool
 
 type EditTemplateData struct {
-    URL, DingoVer string
+    URL, DoneURL, DingoVer string
     HasViews, IsAction, WasSaved bool
     Error error
     Views map[string]dingo.View
@@ -29,6 +29,7 @@ type EditTemplateData struct {
 func editViewData(ctx dingo.Context, v dingo.View) EditTemplateData {
     d := new(EditTemplateData)
     d.DingoVer = dingo.VERSION
+    d.DoneURL = ctx.URL.Path
     d.Content = []byte(v.Data(ctx))
 
     return *d
@@ -77,6 +78,7 @@ func (e *editable) Execute(ctx dingo.Context, data interface{}) error {
     d := new(EditTemplateData)
     d.DingoVer = dingo.VERSION
     d.IsAction = true
+    d.DoneURL = ctx.URL.Path
     if err := e.View.Save(ctx, c); err != nil {
         d.Error = err
         d.Content = c
@@ -200,6 +202,7 @@ var editTemplate =
 "body {margin:0}\n" +
 "a {text-decoration:none;color:rgb(0,85,212);}\n"+
 "a:hover {color:rgb(0,25,50);}\n"+
+//"form > a {display:inline-block;text-align:center;cursor:default;color:buttontext;padding:2px 6px 3px;border:2px outset buttonface;background-color:buttonface;box-sizing:border-box;white-space:pre;-webkit-appearance:push-button;font:-webkit-small-control;}\n"+
 //"header {background: rgb(0,25,50) url('data:image/png;base64,"+dingoInlinePng+"') no-repeat center left;"+
 //"border-bottom:solid 1px rgb(0,85,212);padding:10px;}\n"+
 "header {width:345px;margin:0 auto;}\n"+
@@ -247,6 +250,7 @@ dingoSvg+
 "		<form method=\"post\">\n"+
 "		    <textarea name=\"content\" rows=\"35\" cols=\"120\">"+"{{printf \"%s\" .Content |html}}"+"</textarea><br>\n"+
 "		    <input type=\"submit\" value=\"Save\">\n"+
+"		    <a href='{{.DoneURL}}'><button type='button'>Done</button></a>\n"+
 "{{if .IsAction}}"+
 "{{if .WasSaved}}"+
 "           <p style='color:rgb(0,25,50)'>Saved!</p>\n"+

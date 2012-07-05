@@ -30,13 +30,13 @@ func init() {
     gae.New("base.html")
     views.Editable(gae.New("index.html")).Extends("base.html")
 
-    s.AddRoute("^/$", gindex, "GET", "POST")
+    s.ReRoute("^/$", gindex, "GET", "POST")
     s.Get("^/test/$", gtest)
 
-    s.AddRoute("^/blog/(?P<year>\\d{4})/(?P<month>\\d{2})/(?P<day>\\d{2})/(?P<title>\\w+)/$", gtestRouteData, "GET")
+    s.ReRoute("^/blog/(?P<year>\\d{4})/(?P<month>\\d{2})/(?P<day>\\d{2})/(?P<title>\\w+)/$", gtestRouteData, "GET")
 
     // ---- Editable ----
-    s.AddRoute("^/_dt/$", views.EditHandler, "GET", "POST")
+    s.ReRoute("^/_dt/$", views.EditHandler, "GET", "POST")
     views.AddEditableView("base.html")
 
     s.Serve()

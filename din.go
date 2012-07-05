@@ -6,7 +6,6 @@ import (
 	"net"
 	"net/http"
 	"path"
-	"regexp"
 )
 
 const (
@@ -56,65 +55,9 @@ func (self *Context) HttpError(code int) {
 
 /*----------------------------------Route-------------------------------------*/
 type Route interface {
+	Path() string
 	Matches(path string) bool
 	Execute(ctx Context)
-}
-
-/*----------static----------*/
-type route struct {
-	path    string
-	handler Handler
-}
-
-func NewRoute(path string, handler Handler) {
-	rt := new(route)
-	rt.path = path
-	rt.handler = handler
-}
-
-func (r route) Matches(path string) bool {
-	return r.path == path
-}
-
-func (r route) Execute(ctx Context) {
-	r.handler(ctx)
-}
-
-/*----------regexp----------*/
-type reRoute struct {
-	expr    *regexp.Regexp
-	handler Handler
-}
-
-func NewReRoute(re string, handler Handler) Route {
-	rt := new(reRoute)
-	rt.expr = regexp.MustCompile(re)
-	rt.handler = handler
-
-	return *rt
-}
-
-func (r reRoute) data(url string) map[string]string {
-	data := make(map[string]string)
-	matches := r.expr.FindAllStringSubmatch(url, -1)
-
-	for i, n := range r.expr.SubexpNames() {
-		if i == 0 {
-			continue
-		}
-		data[n] = matches[0][i]
-	}
-
-	return data
-}
-
-func (r reRoute) Matches(url string) bool {
-	return r.expr.MatchString(url)
-}
-
-func (r reRoute) Execute(ctx Context) {
-	ctx.RouteData = r.data(ctx.URL.Path)
-	r.handler(ctx)
 }
 
 /*----------------------------------Routes------------------------------------*/
@@ -171,15 +114,22 @@ func (s *Server) initRoutes() {
 	}
 }
 
-func (s *Server) AddRoute(path string, handler Handler, methods ...string) {
+func (s *Server) Route(rt Route, methods ...string) {
 	for _, m := range methods {
-		// TODO, error on invalid `methods`?
 		if r, ok := s.routes[m]; ok {
-			r.Add(NewReRoute(path, handler))
+			r.Add(rt)
 		} else {
-			fmt.Printf("Invalid method: %s, for route: %s\n", m, path)
+			fmt.Printf("Invalid method: %s, for route: %s\n", m, rt.Path())
 		}
 	}
+}
+func (s *Server) StaticRoute(path string, handler Handler, methods ...string) {
+	rt := NewRoute(path, handler)
+	s.Route(rt, methods...)
+}
+func (s *Server) ReRoute(path string, handler Handler, methods ...string) {
+	rt := NewReRoute(path, handler)
+	s.Route(rt, methods...)
 }
 
 func (s *Server) Get(path string, handler Handler) {

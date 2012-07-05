@@ -30,13 +30,13 @@ func main() {
     views.New("base.html")
     views.Editable(views.New("index.html")).Extends("base.html")
 
-    s.AddRoute("^/$", index, "GET", "POST")
+    s.ReRoute("^/$", index, "GET", "POST")
     s.Get("^/test/$", test)
 
-    s.AddRoute("^/blog/(?P<year>\\d{4})/(?P<month>\\d{2})/(?P<day>\\d{2})/(?P<title>\\w+)/$", testRouteData, "GET")
+    s.ReRoute("^/blog/(?P<year>\\d{4})/(?P<month>\\d{2})/(?P<day>\\d{2})/(?P<title>\\w+)/$", testRouteData, "GET")
 
     // ---- Editable ----
-    s.AddRoute("^/_dt/$", views.EditHandler, "GET", "POST")
+    s.ReRoute("^/_dt/$", views.EditHandler, "GET", "POST")
     views.AddEditableView("base.html")
 
     s.Serve()

@@ -75,8 +75,8 @@ func (r reRoute) Execute(ctx Context) {
 
 /*---------regexp2----------*/
 type rRoute struct {
-	path string
-	expr *regexp.Regexp
+	path    string
+	expr    *regexp.Regexp
 	handler reflect.Value
 }
 
@@ -110,4 +110,3 @@ func (r rRoute) Execute(ctx Context) {
 	}
 	r.handler.Call(args)
 }
-

@@ -61,3 +61,12 @@ func TestAdd(t *testing.T) {
 		}
 	}
 }
+
+func TestGet(t *testing.T) {
+	for _, d := range addData {
+		Add(d.name, d.view)
+		if v := Get(d.name); v != d.view {
+			t.Errorf("Failed to get(%s)")
+		}
+	}
+}

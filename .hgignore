@@ -8,3 +8,5 @@ syntax: glob
 *.swp
 _go_.*
 _obj*
+
+test_routes.go.txt

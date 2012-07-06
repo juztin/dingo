@@ -21,6 +21,11 @@ func testRouteData(ctx dingo.Context) {
     views.Execute(ctx, "index.html", nil)
 }
 
+func testRRoute(ctx dingo.Context, year, month, day, title string) {
+    fmt.Printf("%s-%s-%s %s\n", year, month, day, title)                                                                
+    views.Execute(ctx, "index.html", nil)
+}
+
 func main() {
     s := dingo.New("0.0.0.0", 8000)
 
@@ -33,12 +38,14 @@ func main() {
     s.ReRoute("^/$", index, "GET", "POST")
     s.Get("^/test/$", test)
 
-    s.ReRoute("^/blog/(?P<year>\\d{4})/(?P<month>\\d{2})/(?P<day>\\d{2})/(?P<title>\\w+)/$", testRouteData, "GET")
+    s.ReRoute("^/blog1/(?P<year>\\d{4})/(?P<month>\\d{2})/(?P<day>\\d{2})/(?P<title>\\w+)/$", testRouteData, "GET")
 
+    s.RRoute("^/blog2/(\\d{4})/(\\d{2})/(\\d{2})/(\\w+)/$", testRRoute, "GET")
+    
     // ---- Editable ----
     s.ReRoute("^/_dt/$", views.EditHandler, "GET", "POST")
     views.AddEditableView("base.html")
-
+    
     s.Serve()
-}
+}  
 

@@ -36,8 +36,9 @@ func newContext(request *http.Request, writer http.ResponseWriter) Context {
 }
 
 func (c *Context) write(content string) {
-	b := []byte(content)
-	c.Writer.Write(b)
+	//b := []byte(content)
+	//c.Writer.Write(b)
+	c.Writer.Write([]byte(content))
 }
 
 func (c *Context) Redirect(path string) {
@@ -124,16 +125,20 @@ func (s *Server) Route(rt Route, methods ...string) {
 	}
 }
 func (s *Server) StaticRoute(path string, handler Handler, methods ...string) {
-	rt := NewRoute(path, handler)
+	rt := NewSRoute(path, handler)
 	s.Route(rt, methods...)
 }
 func (s *Server) ReRoute(path string, handler Handler, methods ...string) {
 	rt := NewReRoute(path, handler)
 	s.Route(rt, methods...)
 }
+func (s *Server) RRoute(path string, handler interface{}, methods ...string) {
+	rt := NewRRoute(path, handler)
+	s.Route(rt, methods...)
+}
 
 func (s *Server) Get(path string, handler Handler) {
-	//self.routes["GET"].Add(NewRoute(path, handler))
+	//self.routes["GET"].Add(Route(path, handler))
 	s.routes["GET"].Add(NewReRoute(path, handler))
 }
 func (s *Server) Post(path string, handler Handler) {
@@ -163,8 +168,13 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 /*--------------*/
 func _500Handler(ctx Context) {
-	if e, ok := recover().(error); ok {
-		ctx.write(fmt.Sprintf("500!\n%v", e))
+	//if err, ok := recover().(error); ok {
+	if err := recover(); err != nil {
+		fmt.Println("doh!")
+		ctx.Writer.WriteHeader(http.StatusInternalServerError)
+		ctx.write(fmt.Sprintf("TODO - get the 500 view, or default\n%v", err))
+		// TODO get more information to log something useful
+		//ctx.write(fmt.Sprintf("500!\n%v", e))
 	}
 }
 

@@ -51,7 +51,16 @@ func (c *Context) RedirectPerm(path string) {
 	w.WriteHeader(http.StatusMovedPermanently)
 }
 
-func (self *Context) HttpError(code int) {
+func (c *Context) HttpError(status int) {
+	// default to 500 if in invalid status is given
+	if status < 100 || status > 505 {
+		status = 500
+		// TODO Log an error
+	}
+	w := c.Writer
+	w.WriteHeader(status)
+	// TODO attempt to find a matching view
+	w.Write([]byte(http.StatusText(status)))
 }
 
 /*----------------------------------Route-------------------------------------*/

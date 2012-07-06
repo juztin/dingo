@@ -103,6 +103,7 @@ func (r rRoute) Matches(url string) bool {
 }
 
 func (r rRoute) Execute(ctx Context) {
+	// TODO it would be nice if we could detect numbers and cast them as such prior to invoking the func
 	args := []reflect.Value{reflect.ValueOf(ctx)}
 	matches := r.expr.FindStringSubmatch(ctx.URL.Path)
 	for _, a := range matches[1:] {

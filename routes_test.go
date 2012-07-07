@@ -13,7 +13,8 @@ import (
 func wc(ctx Context, s string) {
 	ctx.Writer.Write([]byte(s))
 }
-func dummyHandler_0(ctx Context)                 { wc(ctx, "/") }
+func dummyHandler(ctx Context)                   {}
+func dummyHandler_0(ctx Context)                 { wc(ctx, ctx.Request.URL.Path) }
 func dummyHandler_1(ctx Context, a string)       { wc(ctx, fmt.Sprintf("/%s/", a)) }
 func dummyHandler_2(ctx Context, a, b string)    { wc(ctx, fmt.Sprintf("/%s/%s/", a, b)) }
 func dummyHandler_3(ctx Context, a, b, c string) { wc(ctx, fmt.Sprintf("/%s/%s/%s/", a, b, c)) }
@@ -91,6 +92,13 @@ var reMatchCol = map[rePath]Handler{
 	rePath{"^/a/b/c/$", "/a/b/c/"}:                     dummyHandler_0,
 	rePath{"^/some-thing-cool/$", "/some-thing-cool/"}: dummyHandler_0,
 }
+var reNoMatchCol = map[rePath]Handler{
+	rePath{"^/$", ""}:                                 dummyHandler_0,
+	rePath{"^/blog$", "/blog/"}:                       dummyHandler_0,
+	rePath{"^/a/b/c$", "/a/b/c/"}:                     dummyHandler_0,
+	rePath{"^/some-thing-cool$", "/some-thing-cool/"}: dummyHandler_0,
+}
+
 var rrMatchCol = map[rePath]interface{}{
 	rePath{"^/$", "/"}:                                 dummyHandler_0,
 	rePath{"^/blog/$", "/blog/"}:                       dummyHandler_0,
@@ -129,11 +137,34 @@ func TestSRouteNoMatches(t *testing.T) {
 	}
 }
 
+func TestSRouteExecute(t *testing.T) {
+	sr := sroutes(srMatchCol)
+	for path, r := range sr {
+		ctx := *new(Context)
+		ctx.Writer = dummyWriter{new(bytes.Buffer)}
+		ctx.Request = dummyRequest(path)
+		r.Execute(ctx)
+
+		if ctx.Writer.(dummyWriter).String() != r.Path() {
+			t.Errorf("Handler recieved non-matching args: %v != %s", ctx.Writer, r.Path())
+		}
+	}
+}
+
 func TestReRouteMatches(t *testing.T) {
-	rr := reroutes(reMatchCol)
-	for path, r := range rr {
+	re := reroutes(reMatchCol)
+	for path, r := range re {
 		if !r.Matches(path) {
 			t.Errorf("Route doesn't match it's path: (%s) != (%s)", r.Path(), path)
+		}
+	}
+}
+
+func TestReRouteNoMatches(t *testing.T) {
+	re := reroutes(reNoMatchCol)
+	for path, r := range re {
+		if r.Matches(path) {
+			t.Errorf("Route matches invalid path: (%s) == (%s)", r.Path(), path)
 		}
 	}
 }

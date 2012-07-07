@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-/*-------------------------Setup-------------------------*/
+/*-------------------------Helpers-------------------------*/
 func wc(ctx Context, s string) {
 	ctx.Writer.Write([]byte(s))
 }
@@ -22,17 +22,24 @@ type rePath struct {
 	ReExp, Path string
 }
 
-var rrMatchCol = map[rePath]interface{}{
-	rePath{"^/$", "/"}: dummyHandler_0,
+type sPath struct {
+	RawPath, Path string
 }
-var rrNoMatchCol = map[rePath]interface{}{
-	rePath{"^/$", ""}: dummyHandler_0,
+
+func sroutes(m map[sPath]Handler) map[string]Route {
+	r := make(map[string]Route)
+	for k, v := range m {
+		r[k.RawPath] = NewSRoute(k.Path, v)
+	}
+	return r
 }
-var rrArgCol = map[rePath]interface{}{
-	rePath{"^/$", "/"}:                      dummyHandler_0,
-	rePath{"^/(.*)/$", "/a/"}:               dummyHandler_1,
-	rePath{"^/(.*)/(.*)/$", "/a/b/"}:        dummyHandler_2,
-	rePath{"^/(.*)/(.*)/(.*)/$", "/a/b/c/"}: dummyHandler_3,
+
+func reroutes(m map[rePath]Handler) map[string]Route {
+	r := make(map[string]Route)
+	for k, v := range m {
+		r[k.Path] = NewReRoute(k.ReExp, v)
+	}
+	return r
 }
 
 func rroutes(m map[rePath]interface{}) map[string]Route {
@@ -64,7 +71,73 @@ func (w dummyWriter) String() string {
 	return w.buf.String()
 }
 
+/*-------------------------Data-------------------------*/
+var srMatchCol = map[sPath]Handler{
+	sPath{"/", "/"}:                                 dummyHandler_0,
+	sPath{"/blog/", "/blog/"}:                       dummyHandler_0,
+	sPath{"/a/b/c/", "/a/b/c/"}:                     dummyHandler_0,
+	sPath{"/some-thing-cool/", "/some-thing-cool/"}: dummyHandler_0,
+}
+var srNoMatchCol = map[sPath]Handler{
+	sPath{"/no/", "/"}:                             dummyHandler_0,
+	sPath{"/blog", "/blog/"}:                       dummyHandler_0,
+	sPath{"/a/b/c", "/a/b/c/"}:                     dummyHandler_0,
+	sPath{"/some-thing-cool", "/some-thing-cool/"}: dummyHandler_0,
+}
+
+var reMatchCol = map[rePath]Handler{
+	rePath{"^/$", "/"}:                                 dummyHandler_0,
+	rePath{"^/blog/$", "/blog/"}:                       dummyHandler_0,
+	rePath{"^/a/b/c/$", "/a/b/c/"}:                     dummyHandler_0,
+	rePath{"^/some-thing-cool/$", "/some-thing-cool/"}: dummyHandler_0,
+}
+var rrMatchCol = map[rePath]interface{}{
+	rePath{"^/$", "/"}:                                 dummyHandler_0,
+	rePath{"^/blog/$", "/blog/"}:                       dummyHandler_0,
+	rePath{"^/a/b/c/$", "/a/b/c/"}:                     dummyHandler_0,
+	rePath{"^/some-thing-cool/$", "/some-thing-cool/"}: dummyHandler_0,
+}
+var rrNoMatchCol = map[rePath]interface{}{
+	rePath{"^/$", ""}:                                 dummyHandler_0,
+	rePath{"^/blog$", "/blog/"}:                       dummyHandler_0,
+	rePath{"^/a/b/c$", "/a/b/c/"}:                     dummyHandler_0,
+	rePath{"^/some-thing-cool$", "/some-thing-cool/"}: dummyHandler_0,
+}
+var rrArgCol = map[rePath]interface{}{
+	rePath{"^/$", "/"}:                      dummyHandler_0,
+	rePath{"^/(.*)/$", "/a/"}:               dummyHandler_1,
+	rePath{"^/(.*)/(.*)/$", "/a/b/"}:        dummyHandler_2,
+	rePath{"^/(.*)/(.*)/(.*)/$", "/a/b/c/"}: dummyHandler_3,
+}
+
 /*-------------------------Tests-------------------------*/
+func TestSRouteMatches(t *testing.T) {
+	sr := sroutes(srMatchCol)
+	for path, r := range sr {
+		if !r.Matches(path) {
+			t.Errorf("Route doesn't match it's path: (%s) != (%s)", r.Path(), path)
+		}
+	}
+}
+
+func TestSRouteNoMatches(t *testing.T) {
+	sr := sroutes(srNoMatchCol)
+	for path, r := range sr {
+		if r.Matches(path) {
+			t.Errorf("Route doesn't match it's path: (%s) != (%s)", r.Path(), path)
+		}
+	}
+}
+
+func TestReRouteMatches(t *testing.T) {
+	rr := reroutes(reMatchCol)
+	for path, r := range rr {
+		if !r.Matches(path) {
+			t.Errorf("Route doesn't match it's path: (%s) != (%s)", r.Path(), path)
+		}
+	}
+}
+
 func TestRRouteMatches(t *testing.T) {
 	rr := rroutes(rrMatchCol)
 	for path, r := range rr {

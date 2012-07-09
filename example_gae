@@ -27,8 +27,10 @@ func init() {
     s := gae.Server()
 
     // --- Routes ---
-    gae.New("base.html")
-    views.Editable(gae.New("index.html")).Extends("base.html")
+    //gae.New("base.html")
+    //views.Editable(gae.New("index.html")).Extends("base.html")
+    gae.NewEditable("base.html")
+	gae.NewEditable("index.html").Extends("base.html")
 
     s.ReRoute("^/$", gindex, "GET", "POST")
     s.Get("^/test/$", gtest)
@@ -37,7 +39,7 @@ func init() {
 
     // ---- Editable ----
     s.ReRoute("^/_dt/$", views.EditHandler, "GET", "POST")
-    views.AddEditableView("base.html")
+    //views.AddEditableView("base.html")
 
     s.Serve()
 }

@@ -246,7 +246,7 @@ var editTemplate = "<!doctype html>\n" +
 	"		<form method=\"post\">\n" +
 	"		    <textarea name=\"content\" rows=\"35\" cols=\"120\">" + "{{printf \"%s\" .Content |html}}" + "</textarea><br>\n" +
 	"		    <input type=\"submit\" value=\"Save\">\n" +
-	"		    <a href='{{.DoneURL}}'><button type='button'>Done</button></a>\n" +
+	"		    {{if not .HasViews}}<a href='{{.DoneURL}}'><button type='button'>Done</button></a>\n{{end}}" +
 	"{{if .IsAction}}" +
 	"{{if .WasSaved}}" +
 	"           <p style='color:rgb(0,25,50)'>Saved!</p>\n" +

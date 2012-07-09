@@ -194,7 +194,7 @@ func _500Handler(ctx Context) {
 		//for _, f, l, ok := runtime.Caller(i); ok; i++ {
 		fmt.Printf("_______________________________________ERR______________________________________\n")
 		fmt.Println(err)
-		for i:= 1; ; i++ {
+		for i := 1; ; i++ {
 			if _, f, l, ok := runtime.Caller(i); !ok {
 				break
 			} else {

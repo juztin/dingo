@@ -52,6 +52,9 @@ func New(key string) views.View {
 
 	return g
 }
+func NewEditable(key string) views.View {
+	return views.Editable(New(key))
+}
 func (g *gae) Save(ctx dingo.Context, data []byte) error {
 	t := template.New("")
 	if _, err := t.Parse(string(data)); err != nil {

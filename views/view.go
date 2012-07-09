@@ -45,10 +45,11 @@ func Execute(ctx dingo.Context, key string, data interface{}) {
 }
 
 type CoreView struct {
-	IsStale                bool
-	ViewName               string
+	IsStale              bool
+	ViewName             string
 	Associated, Extended []string
 }
+
 func (v *CoreView) Name() string {
 	return v.ViewName
 }
@@ -88,9 +89,9 @@ func (v *CoreView) Extensions() (views []View) {
 type TemplateData func(ctx dingo.Context, name string) (*template.Template, []byte, error)
 type TemplateView struct {
 	CoreView
-	Tmpl				   *template.Template
-	TmplData			   TemplateData
-	Bytes				   []byte
+	Tmpl     *template.Template
+	TmplData TemplateData
+	Bytes    []byte
 }
 
 func (v *TemplateView) Init(name string, dataFunc TemplateData) {

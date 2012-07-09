@@ -32,8 +32,10 @@ func main() {
     views.Path = "../templates"
 
     // --- Routes ---
-    views.New("base.html")
-    views.Editable(views.New("index.html")).Extends("base.html")
+    //views.New("base.html")
+    //views.Editable(views.New("index.html")).Extends("base.html")
+    views.NewEditable("base.html")
+	views.NewEditable("index.html").Extends("base.html")
 
     s.ReRoute("^/$", index, "GET", "POST")
     s.Get("^/test/$", test)
@@ -44,7 +46,7 @@ func main() {
     
     // ---- Editable ----
     s.ReRoute("^/_dt/$", views.EditHandler, "GET", "POST")
-    views.AddEditableView("base.html")
+    //views.AddEditableView("base.html")
     
     s.Serve()
 }  

@@ -40,6 +40,10 @@ func New(location string) View {
 	return v
 }
 
+func NewEditable(location string) View {
+	return Editable(New(location))
+}
+
 func (v *view) Save(ctx dingo.Context, data []byte) error {
 	t := template.New("")
 	if _, err := t.Parse(string(data)); err != nil {
@@ -54,4 +58,3 @@ func (v *view) Save(ctx dingo.Context, data []byte) error {
 	v.Reload(ctx)
 	return nil
 }
-

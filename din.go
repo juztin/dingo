@@ -6,10 +6,12 @@ import (
 	"net"
 	"net/http"
 	"path"
+	"runtime"
+	//"strings"
 )
 
 const (
-	VERSION string = "0.1.0"
+	VERSION string = "0.1.1"
 )
 
 var (
@@ -181,9 +183,28 @@ func _500Handler(ctx Context) {
 	if err := recover(); err != nil {
 		fmt.Println("doh!")
 		ctx.Writer.WriteHeader(http.StatusInternalServerError)
-		ctx.write(fmt.Sprintf("TODO - get the 500 view, or default\n%v", err))
-		// TODO get more information to log something useful
-		//ctx.write(fmt.Sprintf("500!\n%v", e))
+
+		// TODO write the 500 message, or stack, depending on some settings
+		// if !emitError
+		ctx.write(http.StatusText(500))
+
+		// else
+		// hmm.. `i` doesn't get incremented on the call to `runtime.Caller(i)`
+		//i := 1
+		//for _, f, l, ok := runtime.Caller(i); ok; i++ {
+		fmt.Printf("_______________________________________ERR______________________________________\n")
+		fmt.Println(err)
+		for i:= 1; ; i++ {
+			if _, f, l, ok := runtime.Caller(i); !ok {
+				break
+			} else {
+				//p := strings.Split(f, "/")
+				//fmt.Printf("%s : %d\n", p[len(p)-1], l)
+				//fmt.Printf("%s\n%d\n_________________________\n", f, l)
+				fmt.Printf("Line: %d\nfile: %s\n-\n", l, f)
+			}
+		}
+		fmt.Printf("________________________________________________________________________________\n")
 	}
 }
 

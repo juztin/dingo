@@ -16,7 +16,13 @@ func (d *dummyView) Name() string {
 func (d *dummyView) Associate(names ...string) error {
 	return nil
 }
+func (d *dummyView) Associations() []View {
+	return nil
+}
 func (d *dummyView) Extends(name string) error {
+	return nil
+}
+func (d *dummyView) Extensions() []View {
 	return nil
 }
 func (d *dummyView) Data(ctx dingo.Context) string {

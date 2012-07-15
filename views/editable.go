@@ -95,10 +95,15 @@ func (e *editable) Execute(ctx dingo.Context, data interface{}) error {
 }
 
 func EditHandler(ctx dingo.Context) {
+	if !CanEdit(ctx) {
+		ctx.HttpError(401)
+		return
+	}
+
+	var v View
 	ctx.ParseForm()
 	d := editCtxData(ctx)
 
-	var v View
 	if n, ok := ctx.Form["name"]; !ok {
 		editTempl.Execute(ctx.Writer, d)
 		return

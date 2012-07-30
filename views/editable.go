@@ -95,15 +95,10 @@ func (e *editable) Execute(ctx dingo.Context, data interface{}) error {
 }
 
 func EditHandler(ctx dingo.Context) {
-	if !CanEdit(ctx) {
-		ctx.HttpError(401)
-		return
-	}
-
-	var v View
 	ctx.ParseForm()
 	d := editCtxData(ctx)
 
+	var v View
 	if n, ok := ctx.Form["name"]; !ok {
 		editTempl.Execute(ctx.Writer, d)
 		return
@@ -197,6 +192,7 @@ var editTemplate = "<!doctype html>\n" +
 	"<head>\n" +
 	"	<meta charset=\"utf-8\">\n" +
 	"	<title>Dingo - Template Edit</title>\n" +
+	"   <link rel=\"stylesheet\" href=\"/css/codemirror.css\">\n" +
 	"	<style>\n" +
 	".clear {clear:both;}\n" +
 	"html {background-color:rgb(0,25,50);}\n" +
@@ -222,12 +218,13 @@ var editTemplate = "<!doctype html>\n" +
 	"footer {background-color:rgb(0,25,50);border-top:solid 1px rgb(0,85,212);padding: 10px;color:rgb(235,235,245);text-align:center;}\n" +
 	"footer .dVer {font-style:italic;}\n" +
 	"footer a:hover {color:rgb(235,235,245);}\n" +
+	".CodeMirror {border:1px solid;}\n" +
 	"" +
 	"	</style>\n" +
 
 	// jQuery tab/textarea
-	"<script src='//ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js'></script>\n" +
-	"<script>window.jQuery || document.write('<script src=\"/js/libs/jquery-1.6.2.min.js\"><\\/script>')</script>\n" +
+//	"<script src='//ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js'></script>\n" +
+//	"<script>window.jQuery || document.write('<script src=\"/js/libs/jquery-1.6.2.min.js\"><\\/script>')</script>\n" +
 	// jQuery tab/textarea
 
 	"</head>\n" +
@@ -249,7 +246,7 @@ var editTemplate = "<!doctype html>\n" +
 	"       </nav>\n" +
 	"{{end}}" +
 	"		<form method=\"post\">\n" +
-	"		    <textarea name=\"content\" rows=\"35\" cols=\"120\">" + "{{printf \"%s\" .Content |html}}" + "</textarea><br>\n" +
+	"		    <textarea id=\"code\" name=\"content\" rows=\"35\" cols=\"120\">" + "{{printf \"%s\" .Content |html}}" + "</textarea><br>\n" +
 	"		    <input type=\"submit\" value=\"Save\">\n" +
 	"		    {{if not .HasViews}}<a href='{{.DoneURL}}'><button type='button'>Done</button></a>\n{{end}}" +
 	"{{if .IsAction}}" +
@@ -272,9 +269,10 @@ var editTemplate = "<!doctype html>\n" +
 	"	<div class='dVer'>dingo {{.DingoVer}}</div>\n" +
 	"</footer>\n" +
 
+	"<script src='/js/libs/codemirror.js'></script>\n" +
 	// jQuery tab/textarea
 	"<script>\n" +
-	"$('textarea').keydown(function (e) {\n" +
+/*	"$('textarea').keydown(function (e) {\n" +
 	"    if (e.keyCode == 9) {\n" +
 	"        var myValue = '\t';\n" +
 	"        var startPos = this.selectionStart;\n" +
@@ -288,6 +286,8 @@ var editTemplate = "<!doctype html>\n" +
 	"        e.preventDefault();\n" +
 	"    }\n" +
 	"});\n" +
+*/
+	"CodeMirror.fromTextArea(document.getElementById('code'), {mode: 'text/html', tabMode: 'indent'});\n"+
 	"</script>\n" +
 	// jQuery tab/textarea
 

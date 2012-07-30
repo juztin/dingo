@@ -96,9 +96,13 @@ func (e *editable) Execute(ctx dingo.Context, data interface{}) error {
 
 func EditHandler(ctx dingo.Context) {
 	ctx.ParseForm()
-	d := editCtxData(ctx)
+	if !CanEdit(ctx) {
+		ctx.HttpError(401)
+		return
+	}
 
 	var v View
+	d := editCtxData(ctx)
 	if n, ok := ctx.Form["name"]; !ok {
 		editTempl.Execute(ctx.Writer, d)
 		return
@@ -219,6 +223,7 @@ var editTemplate = "<!doctype html>\n" +
 	"footer .dVer {font-style:italic;}\n" +
 	"footer a:hover {color:rgb(235,235,245);}\n" +
 	".CodeMirror {border:1px solid;}\n" +
+	".CodeMirror,.CodeMirror-scrollbar,.CodeMirror-scroll {height:600px;}\n" +
 	"" +
 	"	</style>\n" +
 

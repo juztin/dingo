@@ -2,7 +2,6 @@ package gae
 
 import (
 	"fmt"
-	"net/http"
 	"text/template"
 
 	"appengine"
@@ -11,6 +10,7 @@ import (
 	"bitbucket.org/juztin/dingo/views"
 )
 
+// TODO when signed in add ability to create template
 var emptyTempl string = "<!doctype html><html><head><title>New Page</title></head><body>Page Hasn't Been Created</body></html>"
 
 type TemplateBytes struct {
@@ -52,7 +52,7 @@ func New(key string) views.View {
 
 	return g
 }
-func NewEditable(key string) views.View {
+func Editable(key string) views.View {
 	return views.Editable(New(key))
 }
 func (g *gae) Save(ctx dingo.Context, data []byte) error {
@@ -71,23 +71,4 @@ func (g *gae) Save(ctx dingo.Context, data []byte) error {
 
 	g.Reload(ctx)
 	return nil
-}
-
-type handler func(w http.ResponseWriter, r *http.Request)
-type GAEServer struct {
-	dingo.Server
-	fn handler
-}
-
-func gaeHandler(s http.Handler) handler {
-	return func(w http.ResponseWriter, r *http.Request) {
-		s.ServeHTTP(w, r)
-	}
-}
-func Server() GAEServer {
-	d := dingo.New("", -1)
-	return GAEServer{d, gaeHandler(&d)}
-}
-func (s *GAEServer) Serve() {
-	http.HandleFunc("/", s.fn)
 }

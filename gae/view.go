@@ -10,9 +10,6 @@ import (
 	"bitbucket.org/juztin/dingo/views"
 )
 
-// TODO when signed in add ability to create template
-var emptyTempl string = "<!doctype html><html><head><title>New Page</title></head><body>Page Hasn't Been Created</body></html>"
-
 type TemplateBytes struct {
 	Bytes []byte
 }
@@ -22,8 +19,8 @@ func getTemplateBytes(c appengine.Context, key string) ([]byte, error) {
 	tb := new(TemplateBytes)
 
 	if err := datastore.Get(c, k, tb); err != nil {
-		if err != datastore.ErrNoSuchEntity {
-			return []byte(emptyTempl), nil
+		if err == datastore.ErrNoSuchEntity {
+			return []byte(views.EmptyTmpl), nil
 		}
 		fmt.Printf("dingo [TEMPLATE_BIGTABLE_ERR] / {%v} - %v\n", key, err)
 		return nil, err

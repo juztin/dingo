@@ -16,10 +16,21 @@ const (
 
 var (
 	httpMethods = []string{
-		"OPTIONS", "GET", "HEAD",
-		"POST", "PUT", "DELETE",
-		"TRACE", "CONNECT"}
+		"OPTIONS",
+		"GET",
+		"HEAD",
+		"POST",
+		"PUT",
+		"DELETE",
+		"TRACE",
+		"CONNECT",
+	}
 )
+
+/*-----------------------------------Error------------------------------------*/
+type Error func(ctx Context, status int)
+
+var ErrorHandler Error
 
 /*----------------------------------Handler-----------------------------------*/
 type Handler func(ctx Context)
@@ -53,7 +64,13 @@ func (c *Context) RedirectPerm(path string) {
 	w.WriteHeader(http.StatusMovedPermanently)
 }
 
-func (c *Context) HttpError(status int) {
+func (c *Context) HttpError(status int, msg []byte) {
+	if ErrorHandler != nil {
+		// should we defer a panic here? Or just assume you know what you're doing?
+		ErrorHandler(*c, status)
+		return
+	}
+
 	// default to 500 if in invalid status is given
 	if status < 100 || status > 505 {
 		status = 500
@@ -61,8 +78,10 @@ func (c *Context) HttpError(status int) {
 	}
 	w := c.Writer
 	w.WriteHeader(status)
-	// TODO attempt to find a matching view
-	w.Write([]byte(http.StatusText(status)))
+	if msg == nil {
+		msg = []byte(http.StatusText(status))
+	}
+	w.Write(msg)
 }
 
 /*----------------------------------Route-------------------------------------*/
@@ -174,19 +193,19 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//ctx.Render("404", nil)
-	s.ctx.write("404")
+	//s.ctx.write("404")
+	s.ctx.HttpError(404, nil)
 }
 
 /*--------------*/
 func _500Handler(ctx Context) {
 	//if err, ok := recover().(error); ok {
 	if err := recover(); err != nil {
-		fmt.Println("doh!")
-		ctx.Writer.WriteHeader(http.StatusInternalServerError)
-
 		// TODO write the 500 message, or stack, depending on some settings
 		// if !emitError
-		ctx.write(http.StatusText(500))
+		//ctx.Writer.WriteHeader(http.StatusInternalServerError)
+		//ctx.write(http.StatusText(500))
+		ctx.HttpError(500, nil)
 
 		// else
 		// hmm.. `i` doesn't get incremented on the call to `runtime.Caller(i)`

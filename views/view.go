@@ -20,7 +20,8 @@ type View interface {
 	Associations() []View
 	Extends(name string) error
 	Extensions() []View
-	Data(ctx dingo.Context) string
+	//Data(ctx dingo.Context) string
+	Data(ctx dingo.Context) []byte
 	Reload(ctx dingo.Context) error
 	Save(ctx dingo.Context, data []byte) error
 	Execute(ctx dingo.Context, data interface{}) error
@@ -105,17 +106,20 @@ func empty(o interface{}) bool {
 	}
 	return true
 }
+
 var commonFuncs = template.FuncMap{
 	"equals": equals,
-	"join": strings.Join,
-	"empty": empty,
+	"join":   strings.Join,
+	"empty":  empty,
 }
+
 func NewTmpl(name string) *template.Template {
 	return template.New(name).Funcs(commonFuncs)
 }
 func AddTmplFunc(name string, fn interface{}) {
 	commonFuncs[name] = fn
 }
+
 /*------------------Base Template, base on `text/template`--------------------*/
 type TemplateData func(ctx dingo.Context, name string) (*template.Template, []byte, error)
 type TemplateView struct {
@@ -131,22 +135,26 @@ func (v *TemplateView) Init(name string, dataFunc TemplateData) {
 	v.TmplData = dataFunc
 	v.IsStale = true
 }
-func (v *TemplateView) Data(ctx dingo.Context) string {
+
+//func (v *TemplateView) Data(ctx dingo.Context) string {
+func (v *TemplateView) Data(ctx dingo.Context) []byte {
 	if v.IsStale {
 		t, b, e := v.TmplData(ctx, v.ViewName)
 		if e != nil {
 			fmt.Println(e.Error())
-			return e.Error()
+			return []byte(e.Error())
 		}
 		v.Tmpl, v.Bytes = t, b
 	}
-	return string(v.Bytes)
+	//return string(v.Bytes)
+	return v.Bytes
 }
 func reload(ctx dingo.Context, t *template.Template, v []View) error {
 	for _, view := range v {
 		if err := reload(ctx, t, view.Extensions()); err != nil {
 			return err
-		} else if t, err = t.Parse(view.Data(ctx)); err != nil {
+			//} else if t, err = t.Parse(view.Data(ctx)); err != nil {
+		} else if t, err = t.Parse(string(view.Data(ctx))); err != nil {
 			fmt.Printf("Failed to parse extension: (%s)\n%s\n", view.Name(), err)
 		}
 	}

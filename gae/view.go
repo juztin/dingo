@@ -31,7 +31,7 @@ func getTemplateBytes(c appengine.Context, key string) ([]byte, error) {
 func getTemplate(ctx dingo.Context, key string) (t *template.Template, b []byte, err error) {
 	c := appengine.NewContext(ctx.Request)
 	if b, err = getTemplateBytes(c, key); err == nil {
-		t = template.New(key)
+		t = views.NewTmpl(key)
 		t, err = t.Parse(string(b))
 	}
 
@@ -53,7 +53,7 @@ func Editable(key string) views.View {
 	return views.Editable(New(key))
 }
 func (g *gae) Save(ctx dingo.Context, data []byte) error {
-	t := template.New("")
+	t := views.NewTmpl("")
 	if _, err := t.Parse(string(data)); err != nil {
 		return err
 	}

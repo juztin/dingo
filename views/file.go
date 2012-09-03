@@ -24,7 +24,7 @@ func parseFile(ctx dingo.Context, name string) (*template.Template, []byte, erro
 	}
 
 	p := filepath.Join(Path, viewLoc)
-	t := template.New(p)
+	t := NewTmpl(p)
 	if _, err = t.Parse(string(b)); err != nil {
 		return nil, nil, err
 	}
@@ -45,7 +45,7 @@ func NewEditable(location string) View {
 }
 
 func (v *view) Save(ctx dingo.Context, data []byte) error {
-	t := template.New("")
+	t := NewTmpl("")
 	if _, err := t.Parse(string(data)); err != nil {
 		return err
 	}

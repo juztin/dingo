@@ -3,6 +3,8 @@ package views
 import (
 	"errors"
 	"fmt"
+	"reflect"
+	"strings"
 	"text/template"
 
 	"bitbucket.org/juztin/dingo"
@@ -86,6 +88,35 @@ func (v *CoreView) Extensions() (views []View) {
 	return
 }
 
+/*----------------------------Common Templ Helpers----------------------------*/
+func equals(x, y interface{}) bool {
+	return x == y
+}
+func empty(o interface{}) bool {
+	switch t := reflect.ValueOf(o); t.Kind() {
+	case reflect.String:
+		return t.Len() == 0
+	case reflect.Array:
+		return t.Len() == 0
+	case reflect.Slice:
+		return t.Len() == 0
+	case reflect.Map:
+		return t.Len() == 0
+	}
+	return true
+}
+var commonFuncs = template.FuncMap{
+	"equals": equals,
+	"join": strings.Join,
+	"empty": empty,
+}
+func NewTmpl(name string) *template.Template {
+	return template.New(name).Funcs(commonFuncs)
+}
+func AddTmplFunc(name string, fn interface{}) {
+	commonFuncs[name] = fn
+}
+/*------------------Base Template, base on `text/template`--------------------*/
 type TemplateData func(ctx dingo.Context, name string) (*template.Template, []byte, error)
 type TemplateView struct {
 	CoreView
@@ -96,7 +127,7 @@ type TemplateView struct {
 
 func (v *TemplateView) Init(name string, dataFunc TemplateData) {
 	v.ViewName = name
-	v.Tmpl, _ = template.New(name).Parse(EmptyTmpl)
+	v.Tmpl, _ = NewTmpl(name).Parse(EmptyTmpl)
 	v.TmplData = dataFunc
 	v.IsStale = true
 }

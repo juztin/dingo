@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	editTempl, _  = template.New("_dingoedit_").Parse(editTemplate)
+	editTempl, _  = NewTmpl("_dingoedit_").Parse(editTemplate)
 	editableViews = make(map[string]View)
 	CanEdit       = func(ctx dingo.Context) bool { return true }
 	EmptyTmpl     = "<!doctype html><head><title>Template Doesn't Exist</title></head>" +
@@ -145,15 +145,15 @@ func script(url string) string {
 	return fmt.Sprintf("<script src='%s'></script>\n", url)
 }
 func codeMirrorCSS() string {
-	if (UseCodeMirror) {
+	if UseCodeMirror {
 		return stylesheet(CodeMirrorCSS)
 	}
 	return ""
 }
 func codeMirrorJS() string {
-	if (UseCodeMirror) {
+	if UseCodeMirror {
 		return script(CodeMirrorJS) +
-			"<script>CodeMirror.fromTextArea(document.getElementById('code'), {mode: 'text/html', tabMode: 'indent'})</script>";
+			"<script>CodeMirror.fromTextArea(document.getElementById('code'), {mode: 'text/html', tabMode: 'indent'})</script>"
 	}
 	return ""
 }
@@ -249,8 +249,8 @@ var editTemplate = "<!doctype html>\n" +
 	"	</style>\n" +
 
 	// jQuery tab/textarea
-//	"<script src='//ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js'></script>\n" +
-//	"<script>window.jQuery || document.write('<script src=\"/js/libs/jquery-1.6.2.min.js\"><\\/script>')</script>\n" +
+	//	"<script src='//ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js'></script>\n" +
+	//	"<script>window.jQuery || document.write('<script src=\"/js/libs/jquery-1.6.2.min.js\"><\\/script>')</script>\n" +
 	// jQuery tab/textarea
 
 	"</head>\n" +
@@ -296,21 +296,21 @@ var editTemplate = "<!doctype html>\n" +
 	//"<script src='"+CodeMirrorJS+"'></script>\n" +
 	// jQuery tab/textarea
 	//"<script>\n" +
-/*	"$('textarea').keydown(function (e) {\n" +
-	"    if (e.keyCode == 9) {\n" +
-	"        var myValue = '\t';\n" +
-	"        var startPos = this.selectionStart;\n" +
-	"        var endPos = this.selectionEnd;\n" +
-	"        var scrollTop = this.scrollTop;\n" +
-	"        this.value = this.value.substring(0, startPos) + myValue + this.value.substring(endPos,this.value.length);\n" +
-	"        this.focus();\n" +
-	"        this.selectionStart = startPos + myValue.length;\n" +
-	"        this.selectionEnd = startPos + myValue.length;\n" +
-	"        this.scrollTop = scrollTop;\n" +
-	"        e.preventDefault();\n" +
-	"    }\n" +
-	"});\n" +
-*/
+	/*	"$('textarea').keydown(function (e) {\n" +
+		"    if (e.keyCode == 9) {\n" +
+		"        var myValue = '\t';\n" +
+		"        var startPos = this.selectionStart;\n" +
+		"        var endPos = this.selectionEnd;\n" +
+		"        var scrollTop = this.scrollTop;\n" +
+		"        this.value = this.value.substring(0, startPos) + myValue + this.value.substring(endPos,this.value.length);\n" +
+		"        this.focus();\n" +
+		"        this.selectionStart = startPos + myValue.length;\n" +
+		"        this.selectionEnd = startPos + myValue.length;\n" +
+		"        this.scrollTop = scrollTop;\n" +
+		"        e.preventDefault();\n" +
+		"    }\n" +
+		"});\n" +
+	*/
 	//"CodeMirror.fromTextArea(document.getElementById('code'), {mode: 'text/html', tabMode: 'indent'});\n"+
 	//"</script>\n" +
 	// jQuery tab/textarea

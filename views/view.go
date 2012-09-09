@@ -37,14 +37,13 @@ func Get(key string) View {
 	return nil
 }
 func Execute(ctx dingo.Context, key string, data interface{}) {
-	if v, ok := viewCol[key]; ok {
-		if err := v.Execute(ctx, data); err != nil {
-			// TODO log
-			fmt.Println(err)
-		}
+	if v, ok := viewCol[key]; !ok {
+		ctx.HttpError(404, nil)
+	} else if err := v.Execute(ctx, data); err != nil {
+		// TODO log this somewhere
+		fmt.Println(err)
+		ctx.HttpError(500, nil)
 	}
-
-	// TODO - issue a 404
 }
 
 type CoreView struct {

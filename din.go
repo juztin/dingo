@@ -2,12 +2,10 @@ package dingo
 
 import (
 	"fmt"
-	//"io"
 	"net"
 	"net/http"
 	"path"
 	"runtime"
-	//"strings"
 )
 
 const (
@@ -168,7 +166,6 @@ func (s *Server) RRoute(path string, handler interface{}, methods ...string) {
 }
 
 func (s *Server) Get(path string, handler Handler) {
-	//self.routes["GET"].Add(Route(path, handler))
 	s.routes["GET"].Add(NewReRoute(path, handler))
 }
 func (s *Server) Post(path string, handler Handler) {
@@ -192,8 +189,6 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	//ctx.Render("404", nil)
-	//s.ctx.write("404")
 	s.ctx.HttpError(404, nil)
 }
 

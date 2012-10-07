@@ -26,7 +26,7 @@ var (
 )
 
 /*-----------------------------------Error------------------------------------*/
-type Error func(ctx Context, status int)
+type Error func(ctx Context, status int) bool
 
 var ErrorHandler Error
 
@@ -65,8 +65,9 @@ func (c *Context) RedirectPerm(path string) {
 func (c *Context) HttpError(status int, msg []byte) {
 	if ErrorHandler != nil {
 		// should we defer a panic here? Or just assume you know what you're doing?
-		ErrorHandler(*c, status)
-		return
+		if ErrorHandler(*c, status) {
+			return
+		}
 	}
 
 	// default to 500 if in invalid status is given

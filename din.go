@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	VERSION string = "0.1.1"
+	VERSION string = "0.1.2"
 )
 
 var (
@@ -114,10 +114,9 @@ func (r *routes) Add(route Route) {
 
 /*-----------------------------------Server-----------------------------------*/
 type Server struct {
-	ip     string
-	port   int
-	routes map[string]Routes
-	ctx    Context
+	listener 	net.Listener
+	routes 		map[string]Routes
+	ctx    		Context
 }
 
 func isCanonical(p string) (string, bool) {
@@ -224,22 +223,30 @@ func _500Handler(ctx Context) {
 }
 
 func (s *Server) Serve() {
-	defer func() { fmt.Println("Shutting down...") }()
+	defer func() {
+		fmt.Println("Shutting down...")
+		s.listener.Close()
+	}()
 
-	addr := fmt.Sprint(s.ip, ":", s.port)
-	listener, _ := net.Listen("tcp", addr)
-
-	fmt.Printf("listening %s:%d\n", s.ip, s.port)
-
-	http.Serve(listener, s)
+	http.Serve(s.listener, s)
 }
 
-func New(ip string, port int) Server {
+func New(l net.Listener) Server {
 	s := new(Server)
-	s.ip = ip
-	s.port = port
-
 	s.initRoutes()
+	s.listener = l
 
 	return *s
+}
+
+func HttpHandler(ip string, port int) (net.Listener, error) {
+	addr := fmt.Sprint(ip, ":", port)
+	return net.Listen("tcp", addr)
+}
+
+func FCGIHandler(sockFile string) (net.Listener, error) {
+	sock, err := net.ResolveUnixAddr("unix", sockFile)
+	listener, err := net.ListenUnix("unix", sock)
+
+	return listener, err
 }

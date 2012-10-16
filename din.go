@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"log"
 	"path"
 	"runtime"
 )
@@ -116,7 +117,6 @@ func (r *routes) Add(route Route) {
 type Server struct {
 	listener 	net.Listener
 	routes 		map[string]Routes
-	ctx    		Context
 }
 
 func isCanonical(p string) (string, bool) {
@@ -148,7 +148,7 @@ func (s *Server) Route(rt Route, methods ...string) {
 		if r, ok := s.routes[m]; ok {
 			r.Add(rt)
 		} else {
-			fmt.Printf("Invalid method: %s, for route: %s\n", m, rt.Path())
+			log.Printf("Invalid method: %s, for route: %s\n", m, rt.Path())
 		}
 	}
 }
@@ -174,22 +174,22 @@ func (s *Server) Post(path string, handler Handler) {
 
 /* http.Handler */
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	s.ctx = newContext(r, w)
-	defer _500Handler(s.ctx)
+	ctx := newContext(r, w)
+	defer _500Handler(ctx)
 
 	if path, ok := isCanonical(r.URL.Path); !ok {
-		s.ctx.RedirectPerm(path)
+		ctx.RedirectPerm(path)
 		return
 	}
 
 	if routes, ok := s.routes[r.Method]; ok {
 		if r, ok := routes.Route(r.URL.Path); ok {
-			r.Execute(s.ctx)
+			r.Execute(ctx)
 			return
 		}
 	}
 
-	s.ctx.HttpError(404, nil)
+	ctx.HttpError(404, nil)
 }
 
 /*--------------*/
@@ -206,8 +206,8 @@ func _500Handler(ctx Context) {
 		// hmm.. `i` doesn't get incremented on the call to `runtime.Caller(i)`
 		//i := 1
 		//for _, f, l, ok := runtime.Caller(i); ok; i++ {
-		fmt.Printf("_______________________________________ERR______________________________________\n")
-		fmt.Println(err)
+		log.Println("_______________________________________ERR______________________________________")
+		log.Println(err)
 		for i := 1; ; i++ {
 			if _, f, l, ok := runtime.Caller(i); !ok {
 				break
@@ -215,10 +215,10 @@ func _500Handler(ctx Context) {
 				//p := strings.Split(f, "/")
 				//fmt.Printf("%s : %d\n", p[len(p)-1], l)
 				//fmt.Printf("%s\n%d\n_________________________\n", f, l)
-				fmt.Printf("Line: %d\nfile: %s\n-\n", l, f)
+				log.Printf("Line: %d\nfile: %s\n-\n", l, f)
 			}
 		}
-		fmt.Printf("________________________________________________________________________________\n")
+		log.Println("________________________________________________________________________________")
 	}
 }
 

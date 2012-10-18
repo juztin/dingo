@@ -244,7 +244,7 @@ func HttpHandler(ip string, port int) (net.Listener, error) {
 	return net.Listen("tcp", addr)
 }
 
-func FCGIHandler(sockFile string) (net.Listener, error) {
+func SOCKHandler(sockFile string) (net.Listener, error) {
 	sock, err := net.ResolveUnixAddr("unix", sockFile)
 	listener, err := net.ListenUnix("unix", sock)
 

@@ -5,6 +5,7 @@ import (
 	"net"
 	"net/http"
 	"log"
+	"os"
 	"path"
 	"runtime"
 )
@@ -244,9 +245,17 @@ func HttpHandler(ip string, port int) (net.Listener, error) {
 	return net.Listen("tcp", addr)
 }
 
-func SOCKHandler(sockFile string) (net.Listener, error) {
-	sock, err := net.ResolveUnixAddr("unix", sockFile)
-	listener, err := net.ListenUnix("unix", sock)
+func SOCKHandler(sockFile string, mode os.FileMode) (net.Listener, error) {
+	// delete stale sock
+	// TODO check errors other than file doesn't exist
+	os.Remove(sockFile)
 
-	return listener, err
+	// create UNIX sock
+	sock, err := net.ResolveUnixAddr("unix", sockFile)
+	if err == nil {
+		if err = os.Chmod(sockFile, mode); err == nil {
+			return net.ListenUnix("unix", sock)
+		}
+	}
+	return nil, err
 }

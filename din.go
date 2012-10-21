@@ -252,10 +252,12 @@ func SOCKHandler(sockFile string, mode os.FileMode) (net.Listener, error) {
 
 	// create UNIX sock
 	sock, err := net.ResolveUnixAddr("unix", sockFile)
-	if err == nil {
-		if err = os.Chmod(sockFile, mode); err == nil {
-			return net.ListenUnix("unix", sock)
-		}
+	if err != nil {
+		return nil, err
+	}
+	if l, err := net.ListenUnix("unix", sock); err == nil {
+		err = os.Chmod(sockFile, mode)
+		return l, err
 	}
 	return nil, err
 }

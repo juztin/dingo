@@ -25,8 +25,8 @@ func (d *dummyView) Extends(name string) error {
 func (d *dummyView) Extensions() []View {
 	return nil
 }
-func (d *dummyView) Data(ctx dingo.Context) string {
-	return ""
+func (d *dummyView) Data(ctx dingo.Context) []byte {
+	return make([]byte, 0)
 }
 func (d *dummyView) Reload(ctx dingo.Context) error {
 	return nil

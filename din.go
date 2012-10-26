@@ -7,11 +7,12 @@ import (
 	"log"
 	"os"
 	"path"
+	//"reflect"
 	"runtime"
 )
 
 const (
-	VERSION string = "0.1.2"
+	VERSION string = "0.1.3"
 )
 
 var (
@@ -114,6 +115,68 @@ func (r *routes) Add(route Route) {
 	r.routes = append(r.routes, route)
 }
 
+/*----------------------------------Router------------------------------------*/
+type newRoute func(path string, h Handler) Route
+func iroute(route newRoute) newIRoute {
+	var fn newIRoute
+	fn = func(path string, h interface{}) Route {
+		/*if h, ok := h.(Handler); ok {
+			return route(path, h)
+		}
+		if h, ok := h.(func(Context)); ok {
+			return route(path, Handler(h))
+		}
+		t := reflect.TypeOf(h)
+		panic(fmt.Sprintf("Handler type: %v is an invalid handler", t))*/
+
+		//switch t := h.(type) {
+		switch h.(type) {
+		case Handler:
+			return route(path, h.(Handler))
+		case func(Context):
+			return route(path, Handler(h.(func(Context))))
+		}
+
+		//t := reflect.TypeOf(h)
+		//panic(fmt.Sprintf("Handler type: %v is an invalid handler", t))
+		panic(fmt.Sprintf("Handler is invalid: %v", h))
+	}
+	return fn
+}
+
+type newIRoute func(path string, h interface{}) Route
+type Router struct {
+	svr *Server
+	path string
+	route newIRoute
+}
+func (r Router) add(h interface{}, m string) Router {
+	route := r.route(r.path, h)
+	r.svr.Route(route, m)
+	return r
+}
+func (r Router) Options(h interface{}) Router {
+	return r.add(h, "OPTIONS")
+}
+func (r Router) Get(h interface{}) Router {
+	return r.add(h, "GET")
+}
+func (r Router) Post(h interface{}) Router {
+	return r.add(h, "POST")
+}
+func (r Router) Put(h interface{}) Router {
+	return r.add(h, "PUT")
+}
+func (r Router) Delete(h interface{}) Router {
+	return r.add(h, "DELETE")
+}
+func (r Router) Trace(h interface{}) Router {
+	return r.add(h, "TRACE")
+}
+func (r Router) Connect(h interface{}) Router {
+	return r.add(h, "CONNECT")
+}
+
 /*-----------------------------------Server-----------------------------------*/
 type Server struct {
 	listener 	net.Listener
@@ -153,7 +216,7 @@ func (s *Server) Route(rt Route, methods ...string) {
 		}
 	}
 }
-func (s *Server) StaticRoute(path string, handler Handler, methods ...string) {
+func (s *Server) SRoute(path string, handler Handler, methods ...string) {
 	rt := NewSRoute(path, handler)
 	s.Route(rt, methods...)
 }
@@ -166,11 +229,14 @@ func (s *Server) RRoute(path string, handler interface{}, methods ...string) {
 	s.Route(rt, methods...)
 }
 
-func (s *Server) Get(path string, handler Handler) {
-	s.routes["GET"].Add(NewReRoute(path, handler))
+func (s *Server) SRouter(p string) Router {
+	return Router{s, p, iroute(NewSRoute)}
 }
-func (s *Server) Post(path string, handler Handler) {
-	s.routes["POST"].Add(NewReRoute(path, handler))
+func (s *Server) ReRouter(p string) Router {
+	return Router{s, p, iroute(NewReRoute)}
+}
+func (s *Server) RRouter(p string) Router {
+	return Router{s, p, NewRRoute}
 }
 
 /* http.Handler */

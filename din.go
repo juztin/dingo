@@ -65,7 +65,7 @@ func (c *Context) RedirectPerm(path string) {
 	w.WriteHeader(http.StatusMovedPermanently)
 }
 
-func (c *Context) HttpError(status int, msg []byte) {
+func (c *Context) HttpError(status int, msg ...[]byte) {
 	if ErrorHandler != nil {
 		// should we defer a panic here? Or just assume you know what you're doing?
 		if ErrorHandler(*c, status) {
@@ -81,9 +81,13 @@ func (c *Context) HttpError(status int, msg []byte) {
 	w := c.Writer
 	w.WriteHeader(status)
 	if msg == nil {
-		msg = []byte(http.StatusText(status))
+		m := []byte(http.StatusText(status))
+		w.Write(m)
+	} else {
+		for _, m := range msg {
+			w.Write(m)
+		}
 	}
-	w.Write(msg)
 }
 
 /*----------------------------------Route-------------------------------------*/

@@ -26,6 +26,7 @@ type EditTemplateData struct {
 	Error                        error
 	Views                        map[string]View
 	Content                      []byte
+	Stylesheets, Scripts         string
 }
 
 func editViewData(ctx dingo.Context, v View) EditTemplateData {
@@ -33,6 +34,8 @@ func editViewData(ctx dingo.Context, v View) EditTemplateData {
 	d.DingoVer = dingo.VERSION
 	d.DoneURL = ctx.URL.Path
 	d.Content = []byte(v.Data(ctx))
+	d.Stylesheets = codeMirrorCSS()
+	d.Scripts = codeMirrorJS()
 
 	return *d
 }
@@ -43,6 +46,8 @@ func editCtxData(ctx dingo.Context) EditTemplateData {
 	d.Views = editableViews
 	d.HasViews = true
 	d.Content = []byte("")
+	d.Stylesheets = codeMirrorCSS()
+	d.Scripts = codeMirrorJS()
 
 	return *d
 }
@@ -81,6 +86,8 @@ func (e *editable) Execute(ctx dingo.Context, data interface{}) error {
 	d.DingoVer = dingo.VERSION
 	d.IsAction = true
 	d.DoneURL = ctx.URL.Path
+	d.Stylesheets = codeMirrorCSS()
+	d.Scripts = codeMirrorJS()
 	if err := e.View.Save(ctx, c); err != nil {
 		d.Error = err
 		d.Content = c
@@ -195,7 +202,8 @@ var editTemplate = "<!doctype html>\n" +
 	"<head>\n" +
 	"	<meta charset=\"utf-8\">\n" +
 	"	<title>Dingo - Template Edit</title>\n" +
-	codeMirrorCSS() +
+	//codeMirrorCSS() +
+	"{{.Stylesheets}}\n" +
 	"	<style>\n" +
 	".clear {clear:both;}\n" +
 	"html {background-color:rgb(0,25,50);}\n" +
@@ -258,6 +266,7 @@ var editTemplate = "<!doctype html>\n" +
 	"	2012 &copy; Justin Wilson | <a href='http://juzt.in/' target='_blank'>juzt.in</a>\n" +
 	"	<div class='dVer'>dingo {{.DingoVer}}</div>\n" +
 	"</footer>\n" +
-	codeMirrorJS() +
+	//codeMirrorJS() +
+	"{{.Scripts}}\n" +
 	"</body>\n" +
 	"</html>"

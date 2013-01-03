@@ -121,8 +121,8 @@ func (r *routes) Add(route Route) {
 
 /*----------------------------------Router------------------------------------*/
 type newRoute func(path string, h Handler) Route
-func iroute(route newRoute) newIRoute {
-	var fn newIRoute
+func iroute(route newRoute) NewIRoute {
+	var fn NewIRoute
 	fn = func(path string, h interface{}) Route {
 		/*if h, ok := h.(Handler); ok {
 			return route(path, h)
@@ -148,11 +148,14 @@ func iroute(route newRoute) newIRoute {
 	return fn
 }
 
-type newIRoute func(path string, h interface{}) Route
+type NewIRoute func(path string, h interface{}) Route
 type Router struct {
 	svr *Server
 	path string
-	route newIRoute
+	route NewIRoute
+}
+func NewRouter(s *Server, path string, route NewIRoute) Router {
+	return Router{s, path, route}
 }
 func (r Router) add(h interface{}, m string) Router {
 	route := r.route(r.path, h)

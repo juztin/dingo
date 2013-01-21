@@ -3,6 +3,7 @@ package views
 import (
 	"errors"
 	"fmt"
+	"log"
 	"reflect"
 	"strings"
 	"text/template"
@@ -41,7 +42,13 @@ func Execute(ctx dingo.Context, key string, data interface{}) {
 		ctx.HttpError(404, nil)
 	} else if err := v.Execute(ctx, data); err != nil {
 		// TODO log this somewhere
-		fmt.Println(err)
+		log.Println("dingo: template execution error, ", err)
+		/* This will cause a warning to be logged from `net/http/server.go`.
+		 * The headers have, most likely, been written to the stream. The error is
+		 * occuring midway through template processing, which is writing to the response stream.
+		 * Server.go logs this; if we don't call the error handler below, then the stream is cut-off
+		 * with no other warning to the client, with this they at-least get the 500 template.
+		 */
 		ctx.HttpError(500, nil)
 	}
 }

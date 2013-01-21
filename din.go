@@ -2,9 +2,9 @@ package dingo
 
 import (
 	"fmt"
+	"log"
 	"net"
 	"net/http"
-	"log"
 	"os"
 	"path"
 	//"reflect"
@@ -121,6 +121,7 @@ func (r *routes) Add(route Route) {
 
 /*----------------------------------Router------------------------------------*/
 type newRoute func(path string, h Handler) Route
+
 func iroute(route newRoute) NewIRoute {
 	var fn NewIRoute
 	fn = func(path string, h interface{}) Route {
@@ -150,10 +151,11 @@ func iroute(route newRoute) NewIRoute {
 
 type NewIRoute func(path string, h interface{}) Route
 type Router struct {
-	svr *Server
-	path string
+	svr   *Server
+	path  string
 	route NewIRoute
 }
+
 func NewRouter(s *Server, path string, route NewIRoute) Router {
 	return Router{s, path, route}
 }
@@ -186,8 +188,8 @@ func (r Router) Connect(h interface{}) Router {
 
 /*-----------------------------------Server-----------------------------------*/
 type Server struct {
-	listener 	net.Listener
-	routes 		map[string]Routes
+	listener net.Listener
+	routes   map[string]Routes
 }
 
 func isCanonical(p string) (string, bool) {

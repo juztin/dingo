@@ -1,6 +1,7 @@
 package dingo
 
 import (
+	"crypto/tls"
 	"fmt"
 	"log"
 	"net"
@@ -12,7 +13,7 @@ import (
 )
 
 const (
-	VERSION string = "0.1.4"
+	VERSION string = "0.1.5"
 )
 
 var (
@@ -318,6 +319,26 @@ func New(l net.Listener) Server {
 func HttpHandler(ip string, port int) (net.Listener, error) {
 	addr := fmt.Sprint(ip, ":", port)
 	return net.Listen("tcp", addr)
+}
+
+func TLSHandler(ip string, port int, certFile, keyFile string) (net.Listener, error) {
+	// Most of this is copied from Go source `net/http - server.go`
+	addr := fmt.Sprint(ip, ":", port)
+	config := &tls.Config{NextProtos: []string{"http/1.1"}}
+
+	var err error
+	config.Certificates = make([]tls.Certificate, 1)
+	config.Certificates[0], err = tls.LoadX509KeyPair(certFile, keyFile)
+	if err != nil {
+		return nil, err
+	}
+
+	conn, err := net.Listen("tcp", addr)
+	if err != nil {
+		return conn, err
+	}
+
+	return tls.NewListener(conn, config), nil
 }
 
 func SOCKHandler(sockFile string, mode os.FileMode) (net.Listener, error) {

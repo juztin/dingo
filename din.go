@@ -193,7 +193,7 @@ type Server struct {
 	routes   map[string]Routes
 }
 
-func isCanonical(p string) (string, bool) {
+func IsCanonical(p string) (string, bool) {
 	if len(p) == 0 {
 		return "/", false
 	} else if p[0] != '/' {
@@ -254,10 +254,10 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx := newContext(r, w)
 	defer _500Handler(ctx)
 
-	if path, ok := isCanonical(r.URL.Path); !ok {
+	/*if path, ok := isCanonical(r.URL.Path); !ok {
 		ctx.RedirectPerm(path)
 		return
-	}
+	}*/
 
 	if routes, ok := s.routes[r.Method]; ok {
 		if r, ok := routes.Route(r.URL.Path); ok {

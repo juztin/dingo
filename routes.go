@@ -27,6 +27,10 @@ func (r route) Matches(path string) bool {
 }
 
 func (r route) Execute(ctx Context) {
+	if path, ok := IsCanonical(ctx.URL.Path); !ok {
+		ctx.RedirectPerm(path)
+		return
+	}
 	r.handler(ctx)
 }
 
@@ -69,6 +73,10 @@ func (r reRoute) Matches(url string) bool {
 }
 
 func (r reRoute) Execute(ctx Context) {
+	if path, ok := IsCanonical(ctx.URL.Path); !ok {
+		ctx.RedirectPerm(path)
+		return
+	}
 	ctx.RouteData = r.data(ctx.URL.Path)
 	r.handler(ctx)
 }
@@ -103,6 +111,10 @@ func (r rRoute) Matches(url string) bool {
 }
 
 func (r rRoute) Execute(ctx Context) {
+	if path, ok := IsCanonical(ctx.URL.Path); !ok {
+		ctx.RedirectPerm(path)
+		return
+	}
 	// TODO it would be nice if we could detect numbers and cast them as such prior to invoking the func
 	args := []reflect.Value{reflect.ValueOf(ctx)}
 	matches := r.expr.FindStringSubmatch(ctx.URL.Path)

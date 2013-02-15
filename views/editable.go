@@ -263,7 +263,7 @@ var editTemplate = "<!doctype html>\n" +
 	"	<div class='clear'></div>\n" +
 	"</article>\n" +
 	"<footer>\n" +
-	"	2012 &copy; Justin Wilson | <a href='http://juzt.in/' target='_blank'>juzt.in</a>\n" +
+	"	2013 &copy; Justin Wilson | <a href='http://juzt.in/' target='_blank'>juzt.in</a>\n" +
 	"	<div class='dVer'>dingo {{.DingoVer}}</div>\n" +
 	"</footer>\n" +
 	//codeMirrorJS() +

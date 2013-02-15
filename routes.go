@@ -22,15 +22,13 @@ func NewSRoute(path string, handler Handler) Route {
 func (r route) Path() string {
 	return r.path
 }
+func (r route) IsCanonical() bool {
+	return true
+}
 func (r route) Matches(path string) bool {
 	return r.path == path
 }
-
 func (r route) Execute(ctx Context) {
-	if path, ok := IsCanonical(ctx.URL.Path); !ok {
-		ctx.RedirectPerm(path)
-		return
-	}
 	r.handler(ctx)
 }
 
@@ -68,15 +66,13 @@ func (r reRoute) data(url string) map[string]string {
 func (r reRoute) Path() string {
 	return r.path
 }
+func (r reRoute) IsCanonical() bool {
+	return true
+}
 func (r reRoute) Matches(url string) bool {
 	return r.expr.MatchString(url)
 }
-
 func (r reRoute) Execute(ctx Context) {
-	if path, ok := IsCanonical(ctx.URL.Path); !ok {
-		ctx.RedirectPerm(path)
-		return
-	}
 	ctx.RouteData = r.data(ctx.URL.Path)
 	r.handler(ctx)
 }
@@ -105,16 +101,13 @@ func NewRRoute(re string, handler interface{}) Route {
 func (r rRoute) Path() string {
 	return r.path
 }
-
+func (r rRoute) IsCanonical() bool {
+	return true
+}
 func (r rRoute) Matches(url string) bool {
 	return r.expr.MatchString(url)
 }
-
 func (r rRoute) Execute(ctx Context) {
-	if path, ok := IsCanonical(ctx.URL.Path); !ok {
-		ctx.RedirectPerm(path)
-		return
-	}
 	// TODO it would be nice if we could detect numbers and cast them as such prior to invoking the func
 	args := []reflect.Value{reflect.ValueOf(ctx)}
 	matches := r.expr.FindStringSubmatch(ctx.URL.Path)

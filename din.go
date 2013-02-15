@@ -8,12 +8,11 @@ import (
 	"net/http"
 	"os"
 	"path"
-	//"reflect"
 	"runtime"
 )
 
 const (
-	VERSION string = "0.1.5"
+	VERSION string = "0.1.6"
 )
 
 var (
@@ -51,8 +50,6 @@ func newContext(request *http.Request, writer http.ResponseWriter) Context {
 }
 
 func (c *Context) write(content string) {
-	//b := []byte(content)
-	//c.Writer.Write(b)
 	c.Writer.Write([]byte(content))
 }
 
@@ -94,6 +91,7 @@ func (c *Context) HttpError(status int, msg ...[]byte) {
 /*----------------------------------Route-------------------------------------*/
 type Route interface {
 	Path() string
+	IsCanonical() bool
 	Matches(path string) bool
 	Execute(ctx Context)
 }
@@ -126,16 +124,6 @@ type newRoute func(path string, h Handler) Route
 func iroute(route newRoute) NewIRoute {
 	var fn NewIRoute
 	fn = func(path string, h interface{}) Route {
-		/*if h, ok := h.(Handler); ok {
-			return route(path, h)
-		}
-		if h, ok := h.(func(Context)); ok {
-			return route(path, Handler(h))
-		}
-		t := reflect.TypeOf(h)
-		panic(fmt.Sprintf("Handler type: %v is an invalid handler", t))*/
-
-		//switch t := h.(type) {
 		switch h.(type) {
 		case Handler:
 			return route(path, h.(Handler))
@@ -143,8 +131,6 @@ func iroute(route newRoute) NewIRoute {
 			return route(path, Handler(h.(func(Context))))
 		}
 
-		//t := reflect.TypeOf(h)
-		//panic(fmt.Sprintf("Handler type: %v is an invalid handler", t))
 		panic(fmt.Sprintf("Handler is invalid: %v", h))
 	}
 	return fn
@@ -254,14 +240,14 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx := newContext(r, w)
 	defer _500Handler(ctx)
 
-	/*if path, ok := isCanonical(r.URL.Path); !ok {
-		ctx.RedirectPerm(path)
-		return
-	}*/
-
 	if routes, ok := s.routes[r.Method]; ok {
-		if r, ok := routes.Route(r.URL.Path); ok {
-			r.Execute(ctx)
+		path, canonical := IsCanonical(r.URL.Path)
+		if r, ok := routes.Route(path); ok {
+			if r.IsCanonical() && !canonical {
+				ctx.RedirectPerm(path)
+			} else {
+				r.Execute(ctx)
+			}
 			return
 		}
 	}
@@ -275,14 +261,8 @@ func _500Handler(ctx Context) {
 	if err := recover(); err != nil {
 		// TODO write the 500 message, or stack, depending on some settings
 		// if !emitError
-		//ctx.Writer.WriteHeader(http.StatusInternalServerError)
-		//ctx.write(http.StatusText(500))
 		ctx.HttpError(500, nil)
 
-		// else
-		// hmm.. `i` doesn't get incremented on the call to `runtime.Caller(i)`
-		//i := 1
-		//for _, f, l, ok := runtime.Caller(i); ok; i++ {
 		log.Println("_______________________________________ERR______________________________________")
 		log.Println(err)
 		for i := 1; ; i++ {
@@ -300,11 +280,6 @@ func _500Handler(ctx Context) {
 }
 
 func (s *Server) Serve() {
-	defer func() {
-		fmt.Println("Shutting down...")
-		s.listener.Close()
-	}()
-
 	http.Serve(s.listener, s)
 }
 
@@ -322,7 +297,7 @@ func HttpHandler(ip string, port int) (net.Listener, error) {
 }
 
 func TLSHandler(ip string, port int, certFile, keyFile string) (net.Listener, error) {
-	// Most of this is copied from Go source `net/http - server.go`
+	// this func is based off of Go source `net/http - server.go`
 	addr := fmt.Sprint(ip, ":", port)
 	config := &tls.Config{NextProtos: []string{"http/1.1"}}
 

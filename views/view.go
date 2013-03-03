@@ -102,11 +102,8 @@ func equals(x, y interface{}) bool {
 func empty(o interface{}) bool {
 	switch t := reflect.ValueOf(o); t.Kind() {
 	case reflect.String:
-		return t.Len() == 0
 	case reflect.Array:
-		return t.Len() == 0
 	case reflect.Slice:
-		return t.Len() == 0
 	case reflect.Map:
 		return t.Len() == 0
 	}
@@ -147,7 +144,7 @@ func (v *TemplateView) Data(ctx dingo.Context) []byte {
 	if v.IsStale {
 		t, b, e := v.TmplData(ctx, v.ViewName)
 		if e != nil {
-			fmt.Println(e.Error())
+			log.Println(e.Error())
 			return []byte(e.Error())
 		}
 		v.Tmpl, v.Bytes = t, b
@@ -161,7 +158,7 @@ func reload(ctx dingo.Context, t *template.Template, v []View) error {
 			return err
 			//} else if t, err = t.Parse(view.Data(ctx)); err != nil {
 		} else if t, err = t.Parse(string(view.Data(ctx))); err != nil {
-			fmt.Printf("Failed to parse extension: (%s)\n%s\n", view.Name(), err)
+			log.Printf("Failed to parse extension: (%s)\n%s\n", view.Name(), err)
 		}
 	}
 	return nil
@@ -169,7 +166,7 @@ func reload(ctx dingo.Context, t *template.Template, v []View) error {
 func (v *TemplateView) Reload(ctx dingo.Context) error {
 	t, b, e := v.TmplData(ctx, v.ViewName)
 	if e != nil {
-		fmt.Println(e)
+		log.Println(e)
 		return e
 	}
 

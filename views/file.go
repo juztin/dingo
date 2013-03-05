@@ -12,7 +12,7 @@ var (
 	Path = "./templates"
 )
 
-type view struct {
+type FileView struct {
 	TemplateView
 }
 
@@ -33,7 +33,7 @@ func parseFile(ctx dingo.Context, name string) (*template.Template, []byte, erro
 }
 
 func New(location string) View {
-	v := new(view)
+	v := new(FileView)
 	v.Init(location, parseFile)
 	Add(location, v)
 
@@ -44,7 +44,7 @@ func NewEditable(location string) View {
 	return Editable(New(location))
 }
 
-func (v *view) Save(ctx dingo.Context, data []byte) error {
+func (v *FileView) Save(ctx dingo.Context, data []byte) error {
 	t := NewTmpl("")
 	if _, err := t.Parse(string(data)); err != nil {
 		return err

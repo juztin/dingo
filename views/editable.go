@@ -52,13 +52,13 @@ func editCtxData(ctx dingo.Context) EditTemplateData {
 	return *d
 }
 
-type editable struct {
+type EditableView struct {
 	View
 	tmpl *template.Template
 }
 
 func Editable(view View) View {
-	e := new(editable)
+	e := new(EditableView)
 	e.View = view
 	e.tmpl = editTempl
 	// add the view to the editable cache
@@ -68,7 +68,7 @@ func Editable(view View) View {
 	return e
 }
 
-func (e *editable) Execute(ctx dingo.Context, data interface{}) error {
+func (e *EditableView) Execute(ctx dingo.Context, data interface{}) error {
 	ctx.ParseForm()
 	if _, ok := ctx.Form["edit"]; !ok || !CanEdit(ctx) {
 		return e.View.Execute(ctx, data)

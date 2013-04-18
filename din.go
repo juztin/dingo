@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	VERSION string = "0.1.8"
+	VERSION string = "0.1.9"
 )
 
 var (
@@ -43,7 +43,7 @@ type Context struct {
 	RouteData map[string]string
 }
 
-func newContext(request *http.Request, writer http.ResponseWriter) Context {
+func NewContext(writer http.ResponseWriter, request *http.Request) Context {
 	c := new(Context)
 	c.Request, c.Writer = request, writer
 	return *c
@@ -237,7 +237,7 @@ func (s *Server) RRouter(p string) Router {
 
 /* http.Handler */
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	ctx := newContext(r, w)
+	ctx := NewContext(w, r)
 	defer _500Handler(ctx)
 
 	if routes, ok := s.routes[r.Method]; ok {

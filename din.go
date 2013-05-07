@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	VERSION string = "0.1.9"
+	VERSION string = "0.1.10"
 )
 
 var (
@@ -54,7 +54,7 @@ func (c *Context) write(content string) {
 }
 
 func (c *Context) Redirect(path string) {
-	http.Redirect(c.Writer, c.Request, path, http.StatusTemporaryRedirect)
+	http.Redirect(c.Writer, c.Request, path, http.StatusFound)
 }
 
 func (c *Context) RedirectPerm(path string) {

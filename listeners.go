@@ -9,12 +9,12 @@ import (
 	"os"
 )
 
-func HttpHandler(ip string, port int) (net.Listener, error) {
+func HttpListener(ip string, port int) (net.Listener, error) {
 	addr := fmt.Sprint(ip, ":", port)
 	return net.Listen("tcp", addr)
 }
 
-func TLSHandler(ip string, port int, certFile, keyFile string) (net.Listener, error) {
+func TLSListener(ip string, port int, certFile, keyFile string) (net.Listener, error) {
 	// this func is based off of Go source `net/http - server.go`
 	addr := fmt.Sprint(ip, ":", port)
 	config := &tls.Config{NextProtos: []string{"http/1.1"}}
@@ -34,7 +34,7 @@ func TLSHandler(ip string, port int, certFile, keyFile string) (net.Listener, er
 	return tls.NewListener(conn, config), nil
 }
 
-func SOCKHandler(sockFile string, mode os.FileMode) (net.Listener, error) {
+func SOCKListener(sockFile string, mode os.FileMode) (net.Listener, error) {
 	// delete stale sock
 	// TODO check errors other than file doesn't exist
 	os.Remove(sockFile)

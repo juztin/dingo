@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	VERSION string = "0.1.11"
+	VERSION string = "0.1.12"
 )
 
 var (
@@ -37,28 +37,24 @@ type Handler func(ctx Context)
 /*----------------------------------Context-----------------------------------*/
 type Context struct {
 	*http.Request
-	Writer    http.ResponseWriter
+	Response  http.ResponseWriter
 	RouteData map[string]string
 }
 
-func NewContext(writer http.ResponseWriter, request *http.Request) Context {
+func NewContext(response http.ResponseWriter, request *http.Request) Context {
 	c := new(Context)
-	c.Request, c.Writer = request, writer
+	c.Request, c.Response = request, response
 	return *c
 }
 
-func (c *Context) write(content string) {
-	c.Writer.Write([]byte(content))
-}
-
 func (c *Context) Redirect(path string) {
-	http.Redirect(c.Writer, c.Request, path, http.StatusFound)
+	http.Redirect(c.Response, c.Request, path, http.StatusFound)
 }
 
 func (c *Context) RedirectPerm(path string) {
-	w := c.Writer
-	w.Header().Set("Location", path)
-	w.WriteHeader(http.StatusMovedPermanently)
+	r := c.Response
+	r.Header().Set("Location", path)
+	r.WriteHeader(http.StatusMovedPermanently)
 }
 
 func (c *Context) HttpError(status int, msg ...[]byte) {
@@ -74,14 +70,14 @@ func (c *Context) HttpError(status int, msg ...[]byte) {
 		status = 500
 		// TODO Log an error
 	}
-	w := c.Writer
-	w.WriteHeader(status)
+	r := c.Response
+	r.WriteHeader(status)
 	if msg == nil {
 		m := []byte(http.StatusText(status))
-		w.Write(m)
+		r.Write(m)
 	} else {
 		for _, m := range msg {
-			w.Write(m)
+			r.Write(m)
 		}
 	}
 }

@@ -75,9 +75,9 @@ func (e *EditableView) Execute(ctx dingo.Context, data interface{}) error {
 	}
 
 	if ctx.Method == "GET" {
-		return e.tmpl.Execute(ctx.Writer, editViewData(ctx, e.View))
+		return e.tmpl.Execute(ctx.Response, editViewData(ctx, e.View))
 	} else if ctx.Method != "POST" {
-		http.Error(ctx.Writer, "Invalid Method", http.StatusMethodNotAllowed)
+		http.Error(ctx.Response, "Invalid Method", http.StatusMethodNotAllowed)
 		return nil
 	}
 
@@ -96,7 +96,7 @@ func (e *EditableView) Execute(ctx dingo.Context, data interface{}) error {
 		d.Content = []byte(e.View.Data(ctx))
 	}
 
-	return e.tmpl.Execute(ctx.Writer, d)
+	return e.tmpl.Execute(ctx.Response, d)
 	// TODO check if this has been updated
 	// https://groups.google.com/forum/?fromgroups#!topic/golang-nuts/7Ks1iq2s7FA
 	// len(edit) == 0 vs edit == ""
@@ -112,11 +112,11 @@ func EditHandler(ctx dingo.Context) {
 	var v View
 	d := editCtxData(ctx)
 	if n, ok := ctx.Form["name"]; !ok {
-		editTempl.Execute(ctx.Writer, d)
+		editTempl.Execute(ctx.Response, d)
 		return
 	} else if v, ok = editableViews[n[0]]; !ok {
 		d.Error = errors.New(fmt.Sprintf("Template name: `%s` does not exist.", n[0]))
-		editTempl.Execute(ctx.Writer, d)
+		editTempl.Execute(ctx.Response, d)
 		return
 	}
 
@@ -134,7 +134,7 @@ func EditHandler(ctx dingo.Context) {
 		d.Content = []byte(v.Data(ctx))
 	}
 
-	editTempl.Execute(ctx.Writer, d)
+	editTempl.Execute(ctx.Response, d)
 }
 
 func AddEditableView(name string) {

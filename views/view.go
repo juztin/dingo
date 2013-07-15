@@ -196,5 +196,5 @@ func (v *TemplateView) Execute(ctx dingo.Context, data interface{}) error {
 		return errors.New("Template is `nil`")
 	}
 
-	return v.Tmpl.Execute(ctx.Writer, data)
+	return v.Tmpl.Execute(ctx.Response, data)
 }

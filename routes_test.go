@@ -11,7 +11,7 @@ import (
 
 /*-------------------------Helpers-------------------------*/
 func wc(ctx Context, s string) {
-	ctx.Writer.Write([]byte(s))
+	ctx.Response.Write([]byte(s))
 }
 func dummyHandler(ctx Context)                   {}
 func dummyHandler_0(ctx Context)                 { wc(ctx, ctx.Request.URL.Path) }
@@ -141,12 +141,12 @@ func TestSRouteExecute(t *testing.T) {
 	sr := sroutes(srMatchCol)
 	for path, r := range sr {
 		ctx := *new(Context)
-		ctx.Writer = dummyWriter{new(bytes.Buffer)}
+		ctx.Response = dummyWriter{new(bytes.Buffer)}
 		ctx.Request = dummyRequest(path)
 		r.Execute(ctx)
 
-		if ctx.Writer.(dummyWriter).String() != r.Path() {
-			t.Errorf("Handler recieved non-matching args: %v != %s", ctx.Writer, r.Path())
+		if ctx.Response.(dummyWriter).String() != r.Path() {
+			t.Errorf("Handler recieved non-matching args: %v != %s", ctx.Response, r.Path())
 		}
 	}
 }
@@ -191,12 +191,12 @@ func TestRRRouteExecute(t *testing.T) {
 	rr := rroutes(rrArgCol)
 	for path, r := range rr {
 		ctx := *new(Context)
-		ctx.Writer = dummyWriter{new(bytes.Buffer)}
+		ctx.Response = dummyWriter{new(bytes.Buffer)}
 		ctx.Request = dummyRequest(path)
 		r.Execute(ctx)
 
-		if ctx.Writer.(dummyWriter).String() != path {
-			t.Errorf("Handler recieved non-matching args: %v != %s", ctx.Writer, path)
+		if ctx.Response.(dummyWriter).String() != path {
+			t.Errorf("Handler recieved non-matching args: %v != %s", ctx.Response, path)
 		}
 	}
 }

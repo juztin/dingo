@@ -15,7 +15,7 @@ var nonCanonicalPaths = []string{
 
 func TestIsCanonical(t *testing.T) {
 	for _, path := range canonicalPaths {
-		if cPath, ok := isCanonical(path); !ok {
+		if cPath, ok := IsCanonical(path); !ok {
 			t.Errorf("Path is canonical (%s)", path)
 		} else if path != cPath {
 			t.Errorf("Canonical paths are not the same (%s):(%s)", path, cPath)
@@ -25,7 +25,7 @@ func TestIsCanonical(t *testing.T) {
 
 func TestIsNotCanonical(t *testing.T) {
 	for _, path := range nonCanonicalPaths {
-		if cPath, ok := isCanonical(path); ok {
+		if cPath, ok := IsCanonical(path); ok {
 			t.Errorf("Path is canonical (%s)", path)
 		} else if path == cPath {
 			t.Errorf("Non Canonical path is the same (%s):(%s)", path, cPath)

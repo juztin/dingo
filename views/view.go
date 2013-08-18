@@ -101,9 +101,7 @@ func equals(x, y interface{}) bool {
 }
 func empty(o interface{}) bool {
 	switch t := reflect.ValueOf(o); t.Kind() {
-	case reflect.Array:
-	case reflect.Slice:
-	case reflect.Map:
+	case reflect.Array, reflect.Slice, reflect.Map:
 		return t.Len() == 0
 	case reflect.String:
 		return t.String() == ""

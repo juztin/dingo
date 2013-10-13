@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	VERSION string = "0.1.13"
+	VERSION string = "0.1.14"
 )
 
 var (
@@ -57,8 +57,10 @@ func (c *Context) RedirectPerm(path string) {
 	r.WriteHeader(http.StatusMovedPermanently)
 }
 
-func (c *Context) HttpError(status int, msg ...[]byte) {
-	if ErrorHandler != nil {
+//func (c *Context) HttpError(status int, msg ...[]byte) {
+func (c *Context) HttpError(status int, msgs ...string) {
+	//if ErrorHandler != nil {
+	if ErrorHandler != nil && msgs == nil {
 		// should we defer a panic here? Or just assume you know what you're doing?
 		if ErrorHandler(*c, status) {
 			return
@@ -72,12 +74,13 @@ func (c *Context) HttpError(status int, msg ...[]byte) {
 	}
 	r := c.Response
 	r.WriteHeader(status)
-	if msg == nil {
+	//if msgs == nil {
+	if len(msgs) == 0 {
 		m := []byte(http.StatusText(status))
 		r.Write(m)
 	} else {
-		for _, m := range msg {
-			r.Write(m)
+		for _, msg := range msgs {
+			r.Write([]byte(msg))
 		}
 	}
 }
@@ -95,12 +98,11 @@ type Routes interface {
 	Route(url string) (Route, bool)
 	Add(route Route)
 }
-type routes struct {
-	routes []Route
-}
+
+type routes []Route
 
 func (r *routes) Route(url string) (Route, bool) {
-	for _, route := range r.routes {
+	for _, route := range *r {
 		if route.Matches(url) {
 			return route, true
 		}
@@ -109,7 +111,7 @@ func (r *routes) Route(url string) (Route, bool) {
 }
 
 func (r *routes) Add(route Route) {
-	r.routes = append(r.routes, route)
+	*r = append(*r, route)
 }
 
 /*----------------------------------Router------------------------------------*/
@@ -193,7 +195,7 @@ func IsCanonical(p string) (string, bool) {
 func (s *Server) initRoutes() {
 	s.routes = make(map[string]Routes)
 	for _, method := range httpMethods {
-		s.routes[method] = &routes{}
+		s.routes[method] = new(routes)
 	}
 }
 
@@ -258,7 +260,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	ctx.HttpError(404, nil)
+	ctx.HttpError(404)
 }
 
 /*--------------*/
@@ -267,7 +269,7 @@ func _500Handler(ctx Context) {
 	if err := recover(); err != nil {
 		// TODO write the 500 message, or stack, depending on some settings
 		// if !emitError
-		ctx.HttpError(500, nil)
+		ctx.HttpError(500)
 
 		log.Println("_______________________________________ERR______________________________________")
 		log.Println(err)

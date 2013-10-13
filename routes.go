@@ -16,19 +16,20 @@ func NewSRoute(path string, handler Handler) Route {
 	rt.path = path
 	rt.handler = handler
 
-	return *rt
+	//return *rt
+	return rt
 }
 
-func (r route) Path() string {
+func (r *route) Path() string {
 	return r.path
 }
-func (r route) IsCanonical() bool {
+func (r *route) IsCanonical() bool {
 	return true
 }
-func (r route) Matches(path string) bool {
+func (r *route) Matches(path string) bool {
 	return r.path == path
 }
-func (r route) Execute(ctx Context) {
+func (r *route) Execute(ctx Context) {
 	r.handler(ctx)
 }
 
@@ -45,10 +46,11 @@ func NewReRoute(re string, handler Handler) Route {
 	rt.expr = regexp.MustCompile(re)
 	rt.handler = handler
 
-	return *rt
+	//return *rt
+	return rt
 }
 
-func (r reRoute) data(url string) map[string]string {
+func (r *reRoute) data(url string) map[string]string {
 	data := make(map[string]string)
 	//matches := r.expr.FindAllStringSubmatch(url, -1)
 	matches := r.expr.FindStringSubmatch(url)
@@ -63,16 +65,16 @@ func (r reRoute) data(url string) map[string]string {
 	return data
 }
 
-func (r reRoute) Path() string {
+func (r *reRoute) Path() string {
 	return r.path
 }
-func (r reRoute) IsCanonical() bool {
+func (r *reRoute) IsCanonical() bool {
 	return true
 }
-func (r reRoute) Matches(url string) bool {
+func (r *reRoute) Matches(url string) bool {
 	return r.expr.MatchString(url)
 }
-func (r reRoute) Execute(ctx Context) {
+func (r *reRoute) Execute(ctx Context) {
 	ctx.RouteData = r.data(ctx.URL.Path)
 	r.handler(ctx)
 }
@@ -95,19 +97,20 @@ func NewRRoute(re string, handler interface{}) Route {
 		r.handler = reflect.ValueOf(handler)
 	}
 
-	return *r
+	//return *r
+	return r
 }
 
-func (r rRoute) Path() string {
+func (r *rRoute) Path() string {
 	return r.path
 }
-func (r rRoute) IsCanonical() bool {
+func (r *rRoute) IsCanonical() bool {
 	return true
 }
-func (r rRoute) Matches(url string) bool {
+func (r *rRoute) Matches(url string) bool {
 	return r.expr.MatchString(url)
 }
-func (r rRoute) Execute(ctx Context) {
+func (r *rRoute) Execute(ctx Context) {
 	// TODO it would be nice if we could detect numbers and cast them as such prior to invoking the func
 	args := []reflect.Value{reflect.ValueOf(ctx)}
 	matches := r.expr.FindStringSubmatch(ctx.URL.Path)

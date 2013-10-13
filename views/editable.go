@@ -105,7 +105,7 @@ func (e *EditableView) Execute(ctx dingo.Context, data interface{}) error {
 func EditHandler(ctx dingo.Context) {
 	ctx.ParseForm()
 	if !CanEdit(ctx) {
-		ctx.HttpError(401, nil)
+		ctx.HttpError(401)
 		return
 	}
 

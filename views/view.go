@@ -21,7 +21,6 @@ type View interface {
 	Associations() []View
 	Extends(name string) error
 	Extensions() []View
-	//Data(ctx dingo.Context) string
 	Data(ctx dingo.Context) []byte
 	Reload(ctx dingo.Context) error
 	Save(ctx dingo.Context, data []byte) error
@@ -39,7 +38,7 @@ func Get(key string) View {
 }
 func Execute(ctx dingo.Context, key string, data interface{}) {
 	if v, ok := viewCol[key]; !ok {
-		ctx.HttpError(404, nil)
+		ctx.HttpError(404)
 	} else if err := v.Execute(ctx, data); err != nil {
 		// TODO log this somewhere
 		log.Println("dingo: template execution error, ", err)
@@ -49,7 +48,7 @@ func Execute(ctx dingo.Context, key string, data interface{}) {
 		 * Server.go logs this; if we don't call the error handler below, then the stream is cut-off
 		 * with no other warning to the client, with this they at-least get the 500 template.
 		 */
-		ctx.HttpError(500, nil)
+		ctx.HttpError(500)
 	}
 }
 
@@ -138,7 +137,6 @@ func (v *TemplateView) Init(name string, dataFunc TemplateData) {
 	v.IsStale = true
 }
 
-//func (v *TemplateView) Data(ctx dingo.Context) string {
 func (v *TemplateView) Data(ctx dingo.Context) []byte {
 	if v.IsStale {
 		t, b, e := v.TmplData(ctx, v.ViewName)
@@ -148,14 +146,12 @@ func (v *TemplateView) Data(ctx dingo.Context) []byte {
 		}
 		v.Tmpl, v.Bytes = t, b
 	}
-	//return string(v.Bytes)
 	return v.Bytes
 }
 func reload(ctx dingo.Context, t *template.Template, v []View) error {
 	for _, view := range v {
 		if err := reload(ctx, t, view.Extensions()); err != nil {
 			return err
-			//} else if t, err = t.Parse(view.Data(ctx)); err != nil {
 		} else if t, err = t.Parse(string(view.Data(ctx))); err != nil {
 			log.Printf("Failed to parse extension: (%s)\n%s\n", view.Name(), err)
 		}

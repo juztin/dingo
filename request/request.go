@@ -7,7 +7,11 @@ package request
 import "net/http"
 
 func is(r *http.Request, s string) bool {
-	ct := http.CanonicalHeaderKey(r.Header.Get("Content-Type"))
+	h := r.Header.Get("Content-Type")
+	if h == "" {
+		h = r.Header.Get("Accept")
+	}
+	ct := http.CanonicalHeaderKey(h)
 	l := len(s)
 	return len(ct) >= l && ct[:l] == s
 }

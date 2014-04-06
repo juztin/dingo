@@ -256,7 +256,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		path, canonical := IsCanonical(r.URL.Path)
 		if r, ok := routes.Route(path); ok {
 			if r.IsCanonical() && !canonical {
-				ctx.RedirectPerm(path)
+				ctx.RedirectPerm(fmt.Sprintf("%s?%s", path, ctx.URL.RawQuery))
 			} else {
 				r.Execute(ctx)
 			}

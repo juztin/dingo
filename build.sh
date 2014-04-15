@@ -1,3 +1,3 @@
 #!/bin/sh -
 
-go build ../dingo ../dingo/views ../dingo/request
+go build ../dingo ../dingo/views ../dingo/request ../dingo/rest

@@ -188,8 +188,8 @@ func IsCanonical(p string) (string, bool) {
 
 	cp := path.Clean(p)
 
-	if cp[len(cp)-1] != '/' {
-		cp = cp + "/"
+	if cp[len(cp)-1] == '/' {
+		cp = cp[:len(cp)-1]
 		return cp, cp == p
 	}
 

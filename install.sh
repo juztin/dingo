@@ -1,6 +1,6 @@
 #!/bin/sh -
 
-go install bitbucket.org/juztin/dingo
-go install bitbucket.org/juztin/dingo/views
-go install bitbucket.org/juztin/dingo/request
-go install bitbucket.org/juztin/dingo/rest
+go install minty.io/dingo
+go install minty.io/dingo/views
+go install minty.io/dingo/request
+go install minty.io/dingo/rest

@@ -1,4 +1,4 @@
 #!/bin/sh -
 
-go test bitbucket.org/juztin/dingo
-go test bitbucket.org/juztin/dingo/views
+go test minty.io/dingo
+go test minty.io/dingo/views

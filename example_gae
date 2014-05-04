@@ -3,9 +3,9 @@ package main
 import (
     "fmt"
 
-    "bitbucket.org/juztin/dingo"
-    "bitbucket.org/juztin/dingo/views"
-    "bitbucket.org/juztin/dingo/views/gae"
+    "minty.io/dingo"
+    "minty.io/dingo/views"
+    "minty.io/dingo/views/gae"
 )
 
 func gindex(ctx dingo.Context) {

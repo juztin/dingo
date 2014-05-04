@@ -12,13 +12,14 @@ import (
 	"strings"
 	"text/template"
 
-	"bitbucket.org/juztin/dingo"
+	"minty.io/dingo"
 )
 
 var (
 	viewCol = make(map[string]View)
 )
 
+// View wraps a template and provides CRUD operations, and nesting of templates.
 type View interface {
 	Name() string
 	Associate(names ...string) error
@@ -31,15 +32,20 @@ type View interface {
 	Execute(ctx dingo.Context, data interface{}) error
 }
 
+// Add adds a new view to the internal views collection.
 func Add(key string, v View) {
 	viewCol[key] = v
 }
+
+// Get finds a view by it's key.
 func Get(key string) View {
 	if v, ok := viewCol[key]; ok {
 		return v
 	}
 	return nil
 }
+
+// Execute invokes a view by key.
 func Execute(ctx dingo.Context, key string, data interface{}) {
 	if v, ok := viewCol[key]; !ok {
 		ctx.HttpError(404)
@@ -56,15 +62,19 @@ func Execute(ctx dingo.Context, key string, data interface{}) {
 	}
 }
 
+// CoreView is the most base view, implementing basic functionality.
 type CoreView struct {
 	IsStale              bool
 	ViewName             string
 	Associated, Extended []string
 }
 
+// Name returns the views name.
 func (v *CoreView) Name() string {
 	return v.ViewName
 }
+
+// Associate relates the given view names with this view.
 func (v *CoreView) Associate(names ...string) error {
 	for _, n := range names {
 		if view := Get(n); view != nil {
@@ -75,12 +85,16 @@ func (v *CoreView) Associate(names ...string) error {
 	// TODO return an error
 	return nil
 }
+
+// Associations returns this views associated views.
 func (v *CoreView) Associations() (views []View) {
 	for _, n := range v.Associated {
 		views = append(views, Get(n))
 	}
 	return
 }
+
+// Extend creates a parent/child relationship with the given view name.
 func (v *CoreView) Extends(name string) error {
 	if view := Get(name); view != nil {
 		v.IsStale = true
@@ -91,6 +105,8 @@ func (v *CoreView) Extends(name string) error {
 	// TODO return an error
 	return nil
 }
+
+// Extensions returns the list of extended views.
 func (v *CoreView) Extensions() (views []View) {
 	for _, n := range v.Extended {
 		views = append(views, Get(n))
@@ -118,15 +134,22 @@ var commonFuncs = template.FuncMap{
 	"empty":  empty,
 }
 
+// NewTmpl returns a new template
 func NewTmpl(name string) *template.Template {
 	return template.New(name).Funcs(commonFuncs)
 }
+
+// AddTmplFunc adds a function to the templates functions.
 func AddTmplFunc(name string, fn interface{}) {
 	commonFuncs[name] = fn
 }
 
 /*------------------Base Template, base on `text/template`--------------------*/
+
+// TemplateData is a func that returns data for a given template used during rendering.
 type TemplateData func(ctx dingo.Context, name string) (*template.Template, []byte, error)
+
+// Base template, extends core template.
 type TemplateView struct {
 	CoreView
 	Tmpl     *template.Template
@@ -134,6 +157,7 @@ type TemplateView struct {
 	Bytes    []byte
 }
 
+// Init initializes the template
 func (v *TemplateView) Init(name string, dataFunc TemplateData) {
 	v.ViewName = name
 	v.Tmpl, _ = NewTmpl(name).Parse(EmptyTmpl)
@@ -141,6 +165,7 @@ func (v *TemplateView) Init(name string, dataFunc TemplateData) {
 	v.IsStale = true
 }
 
+// Data returns the templates raw data, used for both rendering and editing.
 func (v *TemplateView) Data(ctx dingo.Context) []byte {
 	if v.IsStale {
 		t, b, e := v.TmplData(ctx, v.ViewName)
@@ -162,6 +187,8 @@ func reload(ctx dingo.Context, t *template.Template, v []View) error {
 	}
 	return nil
 }
+
+// Reload reloads the template.
 func (v *TemplateView) Reload(ctx dingo.Context) error {
 	t, b, e := v.TmplData(ctx, v.ViewName)
 	if e != nil {
@@ -185,6 +212,8 @@ func (v *TemplateView) Reload(ctx dingo.Context) error {
 
 	return nil
 }
+
+// Execute writes the template to the response using the given data.
 func (v *TemplateView) Execute(ctx dingo.Context, data interface{}) error {
 	if v.IsStale {
 		v.Reload(ctx)

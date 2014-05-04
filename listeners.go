@@ -13,11 +13,13 @@ import (
 	"os"
 )
 
+// HttpListener returns a new net.Listener for the given ip/port
 func HttpListener(ip string, port int) (net.Listener, error) {
 	addr := fmt.Sprint(ip, ":", port)
 	return net.Listen("tcp", addr)
 }
 
+// TLSListener returns a new net.Listener for the given ip/port and cert
 func TLSListener(ip string, port int, certFile, keyFile string) (net.Listener, error) {
 	// this func is based off of Go source `net/http - server.go`
 	addr := fmt.Sprint(ip, ":", port)
@@ -38,6 +40,7 @@ func TLSListener(ip string, port int, certFile, keyFile string) (net.Listener, e
 	return tls.NewListener(conn, config), nil
 }
 
+// SOCKListener returns a new unix sock listener.
 func SOCKListener(sockFile string, mode os.FileMode) (net.Listener, error) {
 	// delete stale sock
 	// TODO check errors other than file doesn't exist

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package dingo is a simple wrapper around net/http providing very
+// simple routing, with RegEx patterns, and views (templates).
 package dingo
 
 import (
@@ -31,37 +33,49 @@ var (
 )
 
 /*-----------------------------------Error------------------------------------*/
+
+// Error func is a handler type called when there is a panic.
 type Error func(ctx Context, status int) bool
 
+// ErrorHandler is the actual handler invoked upon panic.
 var ErrorHandler Error
 
 /*----------------------------------Handler-----------------------------------*/
+
+// Handler is a func type called when a matching route is found.
 type Handler func(ctx Context)
 
 /*----------------------------------Context-----------------------------------*/
+
+// Context holds both the request and response objects, along with route-data,
+// and is passed to handlers.
 type Context struct {
 	*http.Request
 	Response  http.ResponseWriter
 	RouteData map[string]string
 }
 
+// NewContext creates, and returns, a new Context
 func NewContext(response http.ResponseWriter, request *http.Request) Context {
 	c := new(Context)
 	c.Request, c.Response = request, response
 	return *c
 }
 
+// Redirect issues a redirect to the response.
 func (c *Context) Redirect(path string) {
 	http.Redirect(c.Response, c.Request, path, http.StatusFound)
 }
 
+// RedirectPerm issues a permanent redirect to the response.
 func (c *Context) RedirectPerm(path string) {
 	r := c.Response
 	r.Header().Set("Location", path)
 	r.WriteHeader(http.StatusMovedPermanently)
 }
 
-//func (c *Context) HttpError(status int, msg ...[]byte) {
+// HttpError issues the given http error (status) and writes any provided msgs.
+// The ErrorHandler is invoked when it has been set and there are no provided msgs.
 func (c *Context) HttpError(status int, msgs ...string) {
 	//if ErrorHandler != nil {
 	if ErrorHandler != nil && msgs == nil {
@@ -90,6 +104,8 @@ func (c *Context) HttpError(status int, msgs ...string) {
 }
 
 /*----------------------------------Route-------------------------------------*/
+
+// Route is the handling object when a request matches.
 type Route interface {
 	Path() string
 	IsCanonical() bool
@@ -98,6 +114,8 @@ type Route interface {
 }
 
 /*----------------------------------Routes------------------------------------*/
+
+// Routes is a collection of Route types.
 type Routes interface {
 	Route(url string) (Route, bool)
 	Add(route Route)
@@ -105,6 +123,7 @@ type Routes interface {
 
 type routes []Route
 
+// Route finds a Route for the given url, or nil.
 func (r *routes) Route(url string) (Route, bool) {
 	for _, route := range *r {
 		if route.Matches(url) {
@@ -114,11 +133,13 @@ func (r *routes) Route(url string) (Route, bool) {
 	return nil, false
 }
 
+// Add adds a new route to the collection.
 func (r *routes) Add(route Route) {
 	*r = append(*r, route)
 }
 
 /*----------------------------------Router------------------------------------*/
+
 type newRoute func(path string, h Handler) Route
 
 func iroute(route newRoute) NewIRoute {
@@ -136,6 +157,7 @@ func iroute(route newRoute) NewIRoute {
 	return fn
 }
 
+// NewIRoute returns a new route for the given path and handler.
 type NewIRoute func(path string, h interface{}) Route
 type Router struct {
 	svr   *Server
@@ -143,6 +165,7 @@ type Router struct {
 	route NewIRoute
 }
 
+// NewRouter returns a router.
 func NewRouter(s *Server, path string, route NewIRoute) Router {
 	return Router{s, path, route}
 }
@@ -151,34 +174,51 @@ func (r Router) add(h interface{}, m string) Router {
 	r.svr.Route(route, m)
 	return r
 }
+
+// Options adds a route for "OPTIONS" method.
 func (r Router) Options(h interface{}) Router {
 	return r.add(h, "OPTIONS")
 }
+
+// Options adds a route for "GET" method.
 func (r Router) Get(h interface{}) Router {
 	return r.add(h, "GET")
 }
+
+// Options adds a route for "POST" method.
 func (r Router) Post(h interface{}) Router {
 	return r.add(h, "POST")
 }
+
+// Options adds a route for "PUT" method.
 func (r Router) Put(h interface{}) Router {
 	return r.add(h, "PUT")
 }
+
+// Options adds a route for "DELETE" method.
 func (r Router) Delete(h interface{}) Router {
 	return r.add(h, "DELETE")
 }
+
+// Options adds a route for "TRACE" method.
 func (r Router) Trace(h interface{}) Router {
 	return r.add(h, "TRACE")
 }
+
+// Options adds a route for "CONNECT" method.
 func (r Router) Connect(h interface{}) Router {
 	return r.add(h, "CONNECT")
 }
 
 /*-----------------------------------Server-----------------------------------*/
+
+// Server implements http.Handler and routes calls to handlers view a Routes collection.
 type Server struct {
 	listener net.Listener
 	routes   map[string]Routes
 }
 
+// IsCanonical returns wether a matching route is canonical, according to the route.
 func IsCanonical(p string) (string, bool) {
 	if len(p) == 0 {
 		return "/", false
@@ -203,6 +243,7 @@ func (s *Server) initRoutes() {
 	}
 }
 
+// New returns a new Server.
 func New(l net.Listener) Server {
 	s := new(Server)
 	s.initRoutes()
@@ -211,6 +252,7 @@ func New(l net.Listener) Server {
 	return *s
 }
 
+// Route adds a route for the given methods.
 func (s *Server) Route(rt Route, methods ...string) {
 	for _, m := range methods {
 		if r, ok := s.routes[m]; ok {
@@ -220,29 +262,41 @@ func (s *Server) Route(rt Route, methods ...string) {
 		}
 	}
 }
+
+// SRoute adds a new static route.
 func (s *Server) SRoute(path string, handler Handler, methods ...string) {
 	rt := NewSRoute(path, handler)
 	s.Route(rt, methods...)
 }
+
+// ReRoute adds a new RegEx route.
 func (s *Server) ReRoute(path string, handler Handler, methods ...string) {
 	rt := NewReRoute(path, handler)
 	s.Route(rt, methods...)
 }
+
+// RRoute adds a new RegEx route where the params are passed as params to the given handler.
 func (s *Server) RRoute(path string, handler interface{}, methods ...string) {
 	rt := NewRRoute(path, handler)
 	s.Route(rt, methods...)
 }
 
+// SRouter returns a new Router used to add static routes to the server.
 func (s *Server) SRouter(p string) Router {
 	return Router{s, p, iroute(NewSRoute)}
 }
+
+// SRouter returns a new Router used to add RegEx routes to the server.
 func (s *Server) ReRouter(p string) Router {
 	return Router{s, p, iroute(NewReRoute)}
 }
+
+// SRouter returns a new Router used to add RegEx routes to the server where the params are passed to the handler.
 func (s *Server) RRouter(p string) Router {
 	return Router{s, p, NewRRoute}
 }
 
+// Serve begins listening for requests
 func (s *Server) Serve() {
 	http.Serve(s.listener, s)
 }
@@ -268,6 +322,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 /*--------------*/
+
 func _500Handler(ctx Context) {
 	//if err, ok := recover().(error); ok {
 	if err := recover(); err != nil {

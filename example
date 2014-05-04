@@ -3,8 +3,8 @@ package main
 import (
     "fmt"
 
-    "bitbucket.org/juztin/dingo"
-    "bitbucket.org/juztin/dingo/views"
+    "minty.io/dingo"
+    "minty.io/dingo/views"
 )
 
 func index(ctx dingo.Context) {

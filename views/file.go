@@ -9,13 +9,14 @@ import (
 	"path/filepath"
 	"text/template"
 
-	"bitbucket.org/juztin/dingo"
+	"minty.io/dingo"
 )
 
 var (
 	Path = "./templates"
 )
 
+// FileView reads a template from the file system.
 type FileView struct {
 	TemplateView
 }
@@ -36,6 +37,7 @@ func parseFile(ctx dingo.Context, name string) (*template.Template, []byte, erro
 	return t, b, nil
 }
 
+// New returns a new FileView
 func New(location string) View {
 	v := new(FileView)
 	v.Init(location, parseFile)
@@ -44,10 +46,12 @@ func New(location string) View {
 	return v
 }
 
+// NewEditable returns a new editable FileView
 func NewEditable(location string) View {
 	return Editable(New(location))
 }
 
+// Save writes the new template data to the file system
 func (v *FileView) Save(ctx dingo.Context, data []byte) error {
 	t := NewTmpl("")
 	if _, err := t.Parse(string(data)); err != nil {

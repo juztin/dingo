@@ -8,7 +8,7 @@ import (
 	"mime"
 	"net/http"
 
-	"bitbucket.org/juztin/dingo"
+	"minty.io/dingo"
 )
 
 type Handler func(ctx dingo.Context) (int, interface{})

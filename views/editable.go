@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"text/template"
 
-	"bitbucket.org/juztin/dingo"
+	"minty.io/dingo"
 )
 
 var (
@@ -24,6 +24,7 @@ var (
 	CodeMirrorCSS = "/css/codemirror.css"
 )
 
+// EditTemplateData is data passed to the edit template.
 type EditTemplateData struct {
 	URL, DoneURL, DingoVer       string
 	HasViews, IsAction, WasSaved bool
@@ -56,11 +57,13 @@ func editCtxData(ctx dingo.Context) EditTemplateData {
 	return *d
 }
 
+// Editable view wraps a view to be edited.
 type EditableView struct {
 	View
 	tmpl *template.Template
 }
 
+// Editable returns a wrapped view that can be edited.
 func Editable(view View) View {
 	e := new(EditableView)
 	e.View = view
@@ -72,6 +75,7 @@ func Editable(view View) View {
 	return e
 }
 
+// Execute invokes the editor for the wrapped view.
 func (e *EditableView) Execute(ctx dingo.Context, data interface{}) error {
 	ctx.ParseForm()
 	if _, ok := ctx.Form["edit"]; !ok || !CanEdit(ctx) {
@@ -106,6 +110,7 @@ func (e *EditableView) Execute(ctx dingo.Context, data interface{}) error {
 	// len(edit) == 0 vs edit == ""
 }
 
+// EditHandler is a dingo.Handler that edits/saves a given template.
 func EditHandler(ctx dingo.Context) {
 	ctx.ParseForm()
 	if !CanEdit(ctx) {
@@ -141,6 +146,7 @@ func EditHandler(ctx dingo.Context) {
 	editTempl.Execute(ctx.Response, d)
 }
 
+// AddEditableView adds a view to be edited.
 func AddEditableView(name string) {
 	if v := Get(name); v != nil {
 		editableViews[v.Name()] = v

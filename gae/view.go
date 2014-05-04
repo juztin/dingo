@@ -8,10 +8,11 @@ import (
 	"fmt"
 	"text/template"
 
+	"minty.io/dingo"
+	"minty.io/dingo/views"
+
 	"appengine"
 	"appengine/datastore"
-	"bitbucket.org/juztin/dingo"
-	"bitbucket.org/juztin/dingo/views"
 )
 
 type TemplateBytes struct {

@@ -124,9 +124,9 @@ type Routes interface {
 type routes []Route
 
 // Route finds a Route for the given url, or nil.
-func (r *routes) Route(url string) (Route, bool) {
+func (r *routes) Route(path string) (Route, bool) {
 	for _, route := range *r {
-		if route.Matches(url) {
+		if route.Matches(path) {
 			return route, true
 		}
 	}
@@ -222,8 +222,10 @@ type Server struct {
 func IsCanonical(p string) (string, bool) {
 	if len(p) == 0 {
 		return "/", false
-	} else if p[0] != '/' {
-		return "/" + p, false
+		/*} else if p[0] != '/' {
+		return "/" + p, false*/
+	} else if p == "/" {
+		return p, true
 	}
 
 	cp := path.Clean(p)
@@ -308,11 +310,11 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	if routes, ok := s.routes[r.Method]; ok {
 		path, canonical := IsCanonical(r.URL.Path)
-		if r, ok := routes.Route(path); ok {
-			if r.IsCanonical() && !canonical {
+		if rt, ok := routes.Route(path); ok {
+			if !rt.IsCanonical() && !canonical {
 				ctx.RedirectPerm(fmt.Sprintf("%s?%s", path, ctx.URL.RawQuery))
 			} else {
-				r.Execute(ctx)
+				rt.Execute(ctx)
 			}
 			return
 		}

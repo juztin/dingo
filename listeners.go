@@ -14,7 +14,7 @@ import (
 )
 
 // HTTPListener returns a new net.Listener for the given ip/port
-func HttpListener(ip string, port int) (net.Listener, error) {
+func HTTPListener(ip string, port int) (net.Listener, error) {
 	addr := fmt.Sprint(ip, ":", port)
 	return net.Listen("tcp", addr)
 }

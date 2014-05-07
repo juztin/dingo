@@ -222,16 +222,14 @@ type Server struct {
 func IsCanonical(p string) (string, bool) {
 	if len(p) == 0 {
 		return "/", false
-		/*} else if p[0] != '/' {
-		return "/" + p, false*/
-	} else if p == "/" {
-		return p, true
+	} else if p[0] != '/' {
+		return "/" + p, false
 	}
 
 	cp := path.Clean(p)
 
-	if cp[len(cp)-1] == '/' {
-		cp = cp[:len(cp)-1]
+	if cp[len(cp)-1] != '/' {
+		cp = cp + "/"
 		return cp, cp == p
 	}
 
@@ -311,8 +309,9 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if routes, ok := s.routes[r.Method]; ok {
 		path, canonical := IsCanonical(r.URL.Path)
 		if rt, ok := routes.Route(path); ok {
-			if !rt.IsCanonical() && !canonical {
-				ctx.RedirectPerm(fmt.Sprintf("%s?%s", path, ctx.URL.RawQuery))
+			if rt.IsCanonical() && !canonical {
+				r.URL.Path = path
+				ctx.RedirectPerm(r.URL.String())
 			} else {
 				rt.Execute(ctx)
 			}

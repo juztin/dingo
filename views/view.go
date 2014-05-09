@@ -12,7 +12,7 @@ import (
 	"strings"
 	"text/template"
 
-	"minty.io/dingo"
+	"code.minty.io/dingo"
 )
 
 var (

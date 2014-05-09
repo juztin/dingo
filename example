@@ -3,8 +3,8 @@ package main
 import (
     "fmt"
 
-    "minty.io/dingo"
-    "minty.io/dingo/views"
+    "code.minty.io/dingo"
+    "code.minty.io/dingo/views"
 )
 
 func index(ctx dingo.Context) {

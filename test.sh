@@ -1,4 +1,4 @@
 #!/bin/sh -
 
-go test minty.io/dingo
-go test minty.io/dingo/views
+go test code.minty.io/dingo
+go test code.minty.io/dingo/views

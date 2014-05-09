@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"text/template"
 
-	"minty.io/dingo"
-	"minty.io/dingo/views"
+	"code.minty.io/dingo"
+	"code.minty.io/dingo/views"
 
 	"appengine"
 	"appengine/datastore"

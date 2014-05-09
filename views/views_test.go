@@ -7,7 +7,7 @@ package views
 import (
 	"testing"
 
-	"minty.io/dingo"
+	"code.minty.io/dingo"
 )
 
 type dummyView struct {

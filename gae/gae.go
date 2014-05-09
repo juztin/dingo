@@ -7,7 +7,7 @@ package gae
 import (
 	"net/http"
 
-	"minty.io/dingo"
+	"code.minty.io/dingo"
 )
 
 type GAEServer struct {

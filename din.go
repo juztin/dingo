@@ -218,7 +218,7 @@ type Server struct {
 	routes   map[string]Routes
 }
 
-// IsCanonical returns wether a matching route is canonical, according to the route.
+// IsCanonical returns wether the given path is canonical.
 func IsCanonical(p string) (string, bool) {
 	if len(p) == 0 {
 		return "/", false

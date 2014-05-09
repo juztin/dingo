@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"text/template"
 
-	"minty.io/dingo"
+	"code.minty.io/dingo"
 )
 
 var (
